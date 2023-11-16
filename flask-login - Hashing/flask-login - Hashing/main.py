@@ -7,14 +7,15 @@ import bcrypt
 app = Flask(__name__)
 
 # Change this to your secret key (can be anything, it's for extra protection)
-app.secret_key = 'your secret key'
+app.secret_key = 'Weizhangpassword'
 
 # Enter your database connection details below
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = '1234'
-app.config['MYSQL_DB'] = 'pythonlogin'
+app.config['MYSQL_PASSWORD'] = '123456'
+app.config['MYSQL_DB'] = 'holiday_house_rental_system'
 app.config['MYSQL_PORT'] = 3306
+
 
 # Intialize MySQL
 mysql = MySQL(app)
