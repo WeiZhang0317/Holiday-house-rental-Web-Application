@@ -20,6 +20,7 @@ app.config['MYSQL_PORT'] = 3306
 # Intialize MySQL
 mysql = MySQL(app)
 
+
 # http://localhost:5000/login/ - this will be the login page, we need to use both GET and POST requests
 @app.route('/login/', methods=['GET', 'POST'])
 def login():
@@ -32,7 +33,7 @@ def login():
         user_password = request.form['password']
         # Check if account exists using MySQL
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute('SELECT * FROM secureaccount WHERE username = %s', (username,))
+        cursor.execute('SELECT * FROM secureusers WHERE username = %s', (username,))
         # Fetch one record and return result
         account = cursor.fetchone()
         if account is not None:

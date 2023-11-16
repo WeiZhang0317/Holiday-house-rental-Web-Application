@@ -42,6 +42,21 @@ CREATE TABLE IF NOT EXISTS Users
 
 ALTER TABLE Users AUTO_INCREMENT = 101;
 
+/* ----- Create the tables secureusers: ----- */
+CREATE TABLE IF NOT EXISTS secureusers
+(
+  user_id INT PRIMARY KEY AUTO_INCREMENT,
+  username VARCHAR(100) NOT NULL,
+  name VARCHAR(100) NOT NULL,
+  email VARCHAR(100) NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  phone_number VARCHAR(20),
+  role_id VARCHAR(1) NOT NULL,
+  FOREIGN KEY (role_id) REFERENCES Roles(role_id)
+);
+
+ALTER TABLE Users AUTO_INCREMENT = 101;
+
 /* ----- Create the tables Staffs: ----- */
 
 CREATE TABLE IF NOT EXISTS Staff
@@ -126,3 +141,21 @@ INSERT INTO customer (customer_number, address, user_id) VALUES
 ('CUS104', '321 Birch Lane, Hamilton', 104),
 ('CUS105', '654 Cedar Path, Dunedin', 105);
 
+/* ----- Insert data into the tables secureusers: ----- */
+/* ----- Insert customer data: ----- */
+INSERT INTO secureusers (username, name,  email, password, phone_number, role_id) VALUES 
+('Alice123','Alice Smith', 'alice.smith@example.com', 'alicePass1', '0211000001', 'A'),
+('Bob123','Bob Johnson', 'bob.johnson@example.com',  'bobPass2', '0211000002', 'A'),
+('Carol123','Carol Williams', 'carol.williams@example.com', 'carolPass3', '0211000003', 'A'),
+('David123','David Brown', 'david.brown@example.com',  'davidPass4', '0211000004', 'A'),
+('Emma123','Emma Taylor', 'emma.taylor@example.com',  'emmaPass5', '0211000005', 'A');
+
+/* ----- Insert staff data: ----- */
+INSERT INTO secureusers (username, name, email, password, phone_number, role_id) VALUES 
+('Frank22','Frank Wilson', 'frank.wilson@example.com', 'frankPass6', '0211000006', 'B'),
+('Grace11','Grace Miller', 'grace.miller@example.com', 'gracePass7', '0211000007', 'B'),
+('Henry33','Henry Davis', 'henry.davis@example.com', 'henryPass8', '0211000008', 'B');
+
+/* ----- Insert admin data: ----- */
+INSERT INTO secureusers (username, name, email, password, phone_number, role_id) VALUES 
+('Isabella555','Isabella Garcia', 'isabella.garcia@example.com', 'isabellaPass9', '0211000009', 'C');
