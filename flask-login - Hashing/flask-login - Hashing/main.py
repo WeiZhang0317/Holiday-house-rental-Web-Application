@@ -42,7 +42,7 @@ def login():
             # If account exists in accounts table in out database
             # Create session data, we can access this data in other routes
                 session['loggedin'] = True
-                session['id'] = account['id']
+                session['user_id'] = account['user_id']
                 session['username'] = account['username']
                 # Redirect to home page
                 return redirect(url_for('home'))
@@ -65,6 +65,12 @@ def logout():
    # Redirect to login page
    return redirect(url_for('login'))
 
+
+def encrypt_password(plain_password):
+    salt = bcrypt.gensalt()
+    return bcrypt.hashpw(plain_password.encode('utf-8'), salt).decode('utf-8')
+
+
 # http://localhost:5000/register - this will be the registration page, we need to use both GET and POST requests
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -78,7 +84,7 @@ def register():
         email = request.form['email']
         # Check if account exists using MySQL
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute('SELECT * FROM secureaccount WHERE username = %s', (username,))
+        cursor.execute('SELECT * FROM  secureusers  WHERE username = %s', (username,))
         account = cursor.fetchone()
         # If account exists show error and validation checks
         if account:
@@ -93,7 +99,7 @@ def register():
             # Account doesnt exists and the form data is valid, now insert new account into accounts table
             hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
             print(hashed)
-            cursor.execute('INSERT INTO secureaccount VALUES (NULL, %s, %s, %s)', (username, hashed, email,))
+            cursor.execute('INSERT INTO secureusers VALUES ( %s, %s, %s)', (username, password, email))
             mysql.connection.commit()
             msg = 'You have successfully registered!'
     elif request.method == 'POST':
