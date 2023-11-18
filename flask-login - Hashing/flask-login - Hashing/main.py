@@ -17,6 +17,28 @@ def getCursor(dictionary_cursor=False):
     return cursor
 
 
+
+def encrypt_all_user_passwords():
+    # Get all users
+    cursor = getCursor()
+    cursor.execute("SELECT * FROM secureusers")
+    users = cursor.fetchall()
+
+    for user in users:
+        user_id = user[0]
+        plain_password = user[4]
+
+        # Hash the password
+        salt = bcrypt.gensalt()
+        hashed_pw = bcrypt.hashpw(plain_password.encode('utf-8'), salt)
+
+        # Update the hashed password
+        cursor.execute("UPDATE secureusers SET password = %s WHERE user_id = %s", (hashed_pw.decode('utf-8'), user_id))
+
+encrypt_all_user_passwords()
+
+
+
 # http://localhost:5000/login/ - this will be the login page, we need to use both GET and POST requests
 @app.route('/login/', methods=['GET', 'POST'])
 def login():
@@ -29,13 +51,12 @@ def login():
         username = request.form['username']
         user_password = request.form['password']
         # Check if account exists using MySQL
-        cursor = getCursor()
         cursor.execute('SELECT * FROM secureusers WHERE username = %s', (username,))
         # Fetch one record and return result
         account = cursor.fetchone()
         if account is not None:
-            password = account['password']
-            if bcrypt.checkpw(user_password.encode('utf-8'),password.encode('utf-8')):
+            databasepassword = account['password']
+            if bcrypt.checkpw(user_password.encode('utf-8'), databasepassword.encode('utf-8')):
             # If account exists in accounts table in out database
             # Create session data, we can access this data in other routes
                 session['loggedin'] = True
@@ -98,8 +119,9 @@ def register():
             msg = 'Please fill out the form!'
         else:
             # Account doesnt exists and the form data is valid, now insert new account into accounts table
-            hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
-            print(hashed)
+          
+            password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+            print(password)
             cursor.execute('INSERT INTO secureusers (username, name, email, password, phone_number, role_name) VALUES ( %s, %s, %s, %s, %s, %s)', (username,name,email,password,phone_number,role_name))
             msg = 'You have successfully registered!'
     elif request.method == 'POST':
