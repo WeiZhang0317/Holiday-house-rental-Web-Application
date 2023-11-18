@@ -1,7 +1,7 @@
 
-DROP SCHEMA IF EXISTS holiday_house_rental_system;
-CREATE SCHEMA holiday_house_rental_system;
-USE holiday_house_rental_system;
+DROP SCHEMA IF EXISTS houses_sys;
+CREATE SCHEMA houses_sys;
+USE houses_sys;
 
 
 /* ----- Create the tables holiday_houses: ----- */
@@ -18,26 +18,17 @@ CREATE TABLE IF NOT EXISTS holiday_houses
 );
 
 
-/* ----- Create the tables ROLES: ----- */
-
-CREATE TABLE IF NOT EXISTS Roles
-(
-  role_id VARCHAR(1) PRIMARY KEY NOT NULL,
-  role_name VARCHAR(50) NOT NULL
-);
-
 
 /* ----- Create the tables USERS: ----- */
 CREATE TABLE IF NOT EXISTS Users
 (
   user_id INT PRIMARY KEY AUTO_INCREMENT,
   username VARCHAR(100) NOT NULL,
-  name VARCHAR(100) NOT NULL,
+  name VARCHAR(100),
   email VARCHAR(100) NOT NULL,
   password VARCHAR(100) NOT NULL,
   phone_number VARCHAR(20),
-  role_id VARCHAR(1) NOT NULL,
-  FOREIGN KEY (role_id) REFERENCES Roles(role_id)
+  role_name VARCHAR(50) NOT NULL
 );
 
 ALTER TABLE Users AUTO_INCREMENT = 101;
@@ -47,34 +38,33 @@ CREATE TABLE IF NOT EXISTS secureusers
 (
   user_id INT PRIMARY KEY AUTO_INCREMENT,
   username VARCHAR(100) NOT NULL,
-  name VARCHAR(100) NOT NULL,
+  name VARCHAR(100),
   email VARCHAR(100) NOT NULL,
   password VARCHAR(255) NOT NULL,
   phone_number VARCHAR(20),
-  role_id VARCHAR(1) NOT NULL,
-  FOREIGN KEY (role_id) REFERENCES Roles(role_id)
+  role_name VARCHAR(50) NOT NULL
 );
 
-ALTER TABLE Users AUTO_INCREMENT = 101;
+ALTER TABLE secureusers AUTO_INCREMENT = 101;
 
 /* ----- Create the tables Staffs: ----- */
-
 CREATE TABLE IF NOT EXISTS Staff
 (
-  staff_number VARCHAR(50) ,
+  staff_number VARCHAR(50) PRIMARY KEY,
   date_joined DATE NOT NULL,
-  user_id INT PRIMARY KEY,
-  FOREIGN KEY (user_id) REFERENCES Users(user_id)
+  user_id INT,  
+  FOREIGN KEY (user_id) REFERENCES Users(user_id)  
 );
 
 /* ----- Create the tables customers: ----- */
 CREATE TABLE IF NOT EXISTS customer
 (
-  customer_number VARCHAR(50),
-  address VARCHAR(1000) ,
-  user_id INT PRIMARY KEY,
-  FOREIGN KEY (user_id) REFERENCES Users(user_id)
+  customer_number VARCHAR(50) PRIMARY KEY,
+  address VARCHAR(1000),
+  user_id INT,  
+  FOREIGN KEY (user_id) REFERENCES Users(user_id)  
 );
+
 
 
 /* ----- Insert data into the tables holiday_houses: ----- */
@@ -100,31 +90,27 @@ INSERT INTO holiday_houses (house_address, number_of_bedrooms, number_of_bathroo
 ('40 Main St, New Plymouth', 4, 3, 7, 260.00, 'house19.jpg'),
 ('21 Beach Rd, Invercargill', 3, 2, 6, 190.00, 'house20.jpg');
 
-/* ----- Insert data into the tables roles: ----- */
 
-INSERT INTO Roles (role_id, role_name) VALUES 
-('A', 'customer'), 
-('B', 'staff'), 
-('C', 'admin');
 
 /* ----- Insert data into the tables users: ----- */
 /* ----- Insert customer data: ----- */
-INSERT INTO Users (username, name,  email, password, phone_number, role_id) VALUES 
-('Alice123','Alice Smith', 'alice.smith@example.com', 'alicePass1', '0211000001', 'A'),
-('Bob123','Bob Johnson', 'bob.johnson@example.com', 'bobPass2', '0211000002', 'A'),
-('Carol123','Carol Williams', 'carol.williams@example.com', 'carolPass3', '0211000003', 'A'),
-('David123','David Brown', 'david.brown@example.com', 'davidPass4', '0211000004', 'A'),
-('Emma123','Emma Taylor', 'emma.taylor@example.com', 'emmaPass5', '0211000005', 'A');
+INSERT INTO users (username, name,  email, password, phone_number, role_name) VALUES 
+('Alice123','Alice Smith', 'alice.smith@example.com', 'alicePass1', '0211000001', 'customer'),
+('Bob123','Bob Johnson', 'bob.johnson@example.com',  'bobPass2', '0211000002', 'customer'),
+('Carol123','Carol Williams', 'carol.williams@example.com', 'carolPass3', '0211000003', 'customer'),
+('David123','David Brown', 'david.brown@example.com',  'davidPass4', '0211000004', 'customer'),
+('Emma123','Emma Taylor', 'emma.taylor@example.com',  'emmaPass5', '0211000005', 'customer');
 
 /* ----- Insert staff data: ----- */
-INSERT INTO Users (username, name, email, password, phone_number, role_id) VALUES 
-('Frank22','Frank Wilson', 'frank.wilson@example.com', 'frankPass6', '0211000006', 'B'),
-('Grace11','Grace Miller', 'grace.miller@example.com', 'gracePass7', '0211000007', 'B'),
-('Henry33','Henry Davis', 'henry.davis@example.com', 'henryPass8', '0211000008', 'B');
+INSERT INTO users  (username, name, email, password, phone_number, role_name) VALUES 
+('Frank22','Frank Wilson', 'frank.wilson@example.com', 'frankPass6', '0211000006', 'staff'),
+('Grace11','Grace Miller', 'grace.miller@example.com', 'gracePass7', '0211000007', 'staff'),
+('Henry33','Henry Davis', 'henry.davis@example.com', 'henryPass8', '0211000008', 'staff');
 
 /* ----- Insert admin data: ----- */
-INSERT INTO Users (username, name, email, password, phone_number, role_id) VALUES 
-('Isabella555','Isabella Garcia', 'isabella.garcia@example.com', 'isabellaPass9', '0211000009', 'C');
+INSERT INTO users  (username, name, email, password, phone_number, role_name) VALUES 
+('Isabella555','Isabella Garcia', 'isabella.garcia@example.com', 'isabellaPass9', '0211000009', 'staff-admin');
+
 
 /* ----- Insert data into the tables staffs: ----- */
 INSERT INTO Staff (staff_number, date_joined, user_id) VALUES 
@@ -141,21 +127,25 @@ INSERT INTO customer (customer_number, address, user_id) VALUES
 ('CUS104', '321 Birch Lane, Hamilton', 104),
 ('CUS105', '654 Cedar Path, Dunedin', 105);
 
-/* ----- Insert data into the tables secureusers: ----- */
+
+
+
+
+/* ----- Insert data into the tables users: ----- */
 /* ----- Insert customer data: ----- */
-INSERT INTO secureusers (username, name,  email, password, phone_number, role_id) VALUES 
-('Alice123','Alice Smith', 'alice.smith@example.com', 'alicePass1', '0211000001', 'A'),
-('Bob123','Bob Johnson', 'bob.johnson@example.com',  'bobPass2', '0211000002', 'A'),
-('Carol123','Carol Williams', 'carol.williams@example.com', 'carolPass3', '0211000003', 'A'),
-('David123','David Brown', 'david.brown@example.com',  'davidPass4', '0211000004', 'A'),
-('Emma123','Emma Taylor', 'emma.taylor@example.com',  'emmaPass5', '0211000005', 'A');
+INSERT INTO secureusers (username, name,  email, password, phone_number, role_name) VALUES 
+('Alice123','Alice Smith', 'alice.smith@example.com', 'alicePass1', '0211000001', 'customer'),
+('Bob123','Bob Johnson', 'bob.johnson@example.com',  'bobPass2', '0211000002', 'customer'),
+('Carol123','Carol Williams', 'carol.williams@example.com', 'carolPass3', '0211000003', 'customer'),
+('David123','David Brown', 'david.brown@example.com',  'davidPass4', '0211000004', 'customer'),
+('Emma123','Emma Taylor', 'emma.taylor@example.com',  'emmaPass5', '0211000005', 'customer');
 
 /* ----- Insert staff data: ----- */
-INSERT INTO secureusers (username, name, email, password, phone_number, role_id) VALUES 
-('Frank22','Frank Wilson', 'frank.wilson@example.com', 'frankPass6', '0211000006', 'B'),
-('Grace11','Grace Miller', 'grace.miller@example.com', 'gracePass7', '0211000007', 'B'),
-('Henry33','Henry Davis', 'henry.davis@example.com', 'henryPass8', '0211000008', 'B');
+INSERT INTO secureusers  (username, name, email, password, phone_number, role_name) VALUES 
+('Frank22','Frank Wilson', 'frank.wilson@example.com', 'frankPass6', '0211000006', 'staff'),
+('Grace11','Grace Miller', 'grace.miller@example.com', 'gracePass7', '0211000007', 'staff'),
+('Henry33','Henry Davis', 'henry.davis@example.com', 'henryPass8', '0211000008', 'staff');
 
 /* ----- Insert admin data: ----- */
-INSERT INTO secureusers (username, name, email, password, phone_number, role_id) VALUES 
-('Isabella555','Isabella Garcia', 'isabella.garcia@example.com', 'isabellaPass9', '0211000009', 'C');
+INSERT INTO secureusers  (username, name, email, password, phone_number, role_name) VALUES 
+('Isabella555','Isabella Garcia', 'isabella.garcia@example.com', 'isabellaPass9', '0211000009', 'staff-admin');

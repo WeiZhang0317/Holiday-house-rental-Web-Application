@@ -1,24 +1,20 @@
-from flask import Flask, render_template, request, redirect, url_for, session
-from flask_mysqldb import MySQL
-import MySQLdb.cursors
-import re
 import bcrypt
+from flask import Flask, render_template, request, redirect, url_for,session
+import re
+import mysql.connector
+from mysql.connector import FieldType
+import connect
+
 
 app = Flask(__name__)
 
-# Change this to your secret key (can be anything, it's for extra protection)
-app.secret_key = 'Weizhangpassword'
+connection = None
 
-# Enter your database connection details below
-app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = '123456'
-app.config['MYSQL_DB'] = 'holiday_house_rental_system'
-app.config['MYSQL_PORT'] = 3306
-
-
-# Intialize MySQL
-mysql = MySQL(app)
+def getCursor(dictionary_cursor=False):
+    global connection
+    connection = mysql.connector.connect(user=connect.dbuser, password=connect.dbpass, host=connect.dbhost, database=connect.dbname, autocommit=True)
+    cursor = connection.cursor(dictionary=dictionary_cursor)
+    return cursor
 
 
 # http://localhost:5000/login/ - this will be the login page, we need to use both GET and POST requests
@@ -26,13 +22,14 @@ mysql = MySQL(app)
 def login():
     # Output message if something goes wrong...
     msg = ''
+    cursor = getCursor(dictionary_cursor=True)
     # Check if "username" and "password" POST requests exist (user submitted form)
     if request.method == 'POST' and 'username' in request.form and 'password' in request.form:
         # Create variables for easy access
         username = request.form['username']
         user_password = request.form['password']
         # Check if account exists using MySQL
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor = getCursor()
         cursor.execute('SELECT * FROM secureusers WHERE username = %s', (username,))
         # Fetch one record and return result
         account = cursor.fetchone()
@@ -76,14 +73,18 @@ def encrypt_password(plain_password):
 def register():
     # Output message if something goes wrong...
     msg = ''
+    cursor = getCursor(dictionary_cursor=True)
     # Check if "username", "password" and "email" POST requests exist (user submitted form)
     if request.method == 'POST' and 'username' in request.form and 'password' in request.form and 'email' in request.form:
         # Create variables for easy access
+        name = request.form['name']
         username = request.form['username']
         password = request.form['password']
+        phone_number = request.form['phone_number']
         email = request.form['email']
+        role_name= request.form['role_name']
         # Check if account exists using MySQL
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+  
         cursor.execute('SELECT * FROM  secureusers  WHERE username = %s', (username,))
         account = cursor.fetchone()
         # If account exists show error and validation checks
@@ -99,8 +100,7 @@ def register():
             # Account doesnt exists and the form data is valid, now insert new account into accounts table
             hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
             print(hashed)
-            cursor.execute('INSERT INTO secureusers VALUES ( %s, %s, %s)', (username, password, email))
-            mysql.connection.commit()
+            cursor.execute('INSERT INTO secureusers (username, name, email, password, phone_number, role_name) VALUES ( %s, %s, %s, %s, %s, %s)', (username,name,email,password,phone_number,role_name))
             msg = 'You have successfully registered!'
     elif request.method == 'POST':
         # Form is empty... (no POST data)
@@ -124,7 +124,7 @@ def profile():
     # Check if user is loggedin
     if 'loggedin' in session:
         # We need all the account info for the user so we can display it on the profile page
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor = getCursor()
         cursor.execute('SELECT * FROM secureaccount WHERE id = %s', (session['id'],))
         account = cursor.fetchone()
         # Show the profile page with account info
