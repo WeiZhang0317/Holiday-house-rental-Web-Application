@@ -7,8 +7,11 @@ import connect
 
 
 app = Flask(__name__)
+app.secret_key = 'zxw secret key'
 
 connection = None
+
+
 
 def getCursor(dictionary_cursor=False):
     global connection
@@ -16,10 +19,11 @@ def getCursor(dictionary_cursor=False):
     cursor = connection.cursor(dictionary=dictionary_cursor)
     return cursor
 
-
+def encrypt_password(plain_password):
+    salt = bcrypt.gensalt()
+    return bcrypt.hashpw(plain_password.encode('utf-8'), salt).decode('utf-8')
 
 def encrypt_all_user_passwords():
-    # Get all users
     cursor = getCursor()
     cursor.execute("SELECT * FROM secureusers")
     users = cursor.fetchall()
@@ -28,12 +32,9 @@ def encrypt_all_user_passwords():
         user_id = user[0]
         plain_password = user[4]
 
-        # Hash the password
-        salt = bcrypt.gensalt()
-        hashed_pw = bcrypt.hashpw(plain_password.encode('utf-8'), salt)
 
-        # Update the hashed password
-        cursor.execute("UPDATE secureusers SET password = %s WHERE user_id = %s", (hashed_pw.decode('utf-8'), user_id))
+        hashed_pw = encrypt_password(plain_password)
+        cursor.execute("UPDATE secureusers SET password = %s WHERE user_id = %s", (hashed_pw, user_id))
 
 encrypt_all_user_passwords()
 
@@ -56,7 +57,7 @@ def login():
         account = cursor.fetchone()
         if account is not None:
             databasepassword = account['password']
-            if bcrypt.checkpw(user_password.encode('utf-8'), databasepassword.encode('utf-8')):
+            if bcrypt.checkpw(user_password.encode('utf-8'), databasepassword.encode()):
             # If account exists in accounts table in out database
             # Create session data, we can access this data in other routes
                 session['loggedin'] = True
@@ -84,9 +85,7 @@ def logout():
    return redirect(url_for('login'))
 
 
-def encrypt_password(plain_password):
-    salt = bcrypt.gensalt()
-    return bcrypt.hashpw(plain_password.encode('utf-8'), salt).decode('utf-8')
+
 
 
 # http://localhost:5000/register - this will be the registration page, we need to use both GET and POST requests
