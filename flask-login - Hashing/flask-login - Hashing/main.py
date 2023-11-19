@@ -148,13 +148,37 @@ def register():
 # http://localhost:5000/home - this will be the home page, only accessible for loggedin users
 @app.route('/home')
 def home():
+    cursor = getCursor(dictionary_cursor=True)
+    # Check if user is logged in
+    if 'loggedin' in session and session.get('role_name') == 'customer':
+        # User is logged in, show them the home page
+        username = session['username']
+        cursor.execute('SELECT * FROM secureusers WHERE username = %s', (username,))
+        account = cursor.fetchone()
+
+        # Retrieve holiday houses data from database
+        cursor.execute('SELECT * FROM holiday_houses')
+        holiday_houses = cursor.fetchall()
+
+        # Render the home template with account, username, and holiday houses data
+        return render_template('home.html', account=account, username=username, holiday_houses=holiday_houses)
+    
+    # User is not logged in, redirect to login page
+    return redirect(url_for('login'))
+
+
+@app.route('/profile')
+def profile():
+    cursor = getCursor(dictionary_cursor=True)
     # Check if user is loggedin
     if 'loggedin' in session and session.get('role_name') == 'customer':
         # User is loggedin show them the home page
-        return render_template('home.html', username=session['username'])
+        username=session['username']
+        cursor.execute('SELECT * FROM  secureusers  WHERE username = %s', (username,))
+        account = cursor.fetchone()
+        return render_template('profile.html', account=account, username=username )
     # User is not loggedin redirect to login page
     return redirect(url_for('login'))
-
 
 @app.route('/admin')
 def admin():
@@ -176,19 +200,19 @@ def staff():
         return redirect(url_for('login'))    
 
 
-# http://localhost:5000/profile - this will be the profile page, only accessible for loggedin users
-@app.route('/profile')
-def profile():
-    # Check if user is loggedin
-    if 'loggedin' in session:
-        # We need all the account info for the user so we can display it on the profile page
-        cursor = getCursor()
-        cursor.execute('SELECT * FROM secureaccount WHERE id = %s', (session['id'],))
-        account = cursor.fetchone()
-        # Show the profile page with account info
-        return render_template('profile.html', account=account)
-    # User is not loggedin redirect to login page
-    return redirect(url_for('login'))
+# # http://localhost:5000/profile - this will be the profile page, only accessible for loggedin users
+# @app.route('/profile')
+# def profile():
+#     # Check if user is loggedin
+#     if 'loggedin' in session:
+#         # We need all the account info for the user so we can display it on the profile page
+#         cursor = getCursor()
+#         cursor.execute('SELECT * FROM secureaccount WHERE id = %s', (session['id'],))
+#         account = cursor.fetchone()
+#         # Show the profile page with account info
+#         return render_template('profile.html', account=account)
+#     # User is not loggedin redirect to login page
+#     return redirect(url_for('login'))
 
 if __name__ == '__main__':
     app.run(debug=True)
