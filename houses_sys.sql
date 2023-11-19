@@ -131,7 +131,7 @@ INSERT INTO customer (customer_number, address, user_id) VALUES
 
 
 
-/* ----- Insert data into the tables users: ----- */
+/* ----- Insert data into the tables secureusers: ----- */
 /* ----- Insert customer data: ----- */
 INSERT INTO secureusers (username, name,  email, password, phone_number, role_name) VALUES 
 ('Alice123','Alice Smith', 'alice.smith@example.com', 'alicePass1', '0211000001', 'customer'),
@@ -148,4 +148,4 @@ INSERT INTO secureusers  (username, name, email, password, phone_number, role_na
 
 /* ----- Insert admin data: ----- */
 INSERT INTO secureusers  (username, name, email, password, phone_number, role_name) VALUES 
-('Isabella555','Isabella Garcia', 'isabella.garcia@example.com', 'isabellaPass9', '0211000009', 'staff-admin');
+('admin','Isabella Garcia', 'isabella.garcia@example.com', 'admin', '0211000009', 'staff-admin');

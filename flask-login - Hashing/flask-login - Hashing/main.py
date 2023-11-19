@@ -31,14 +31,24 @@ def encrypt_all_user_passwords():
     for user in users:
         user_id = user[0]
         plain_password = user[4]
+        
+        if not plain_password.startswith('$2b$'):
+            hashed_pw = encrypt_password(plain_password)
+            cursor.execute("UPDATE secureusers SET password = %s WHERE user_id = %s", (hashed_pw, user_id))
 
-
-        hashed_pw = encrypt_password(plain_password)
-        cursor.execute("UPDATE secureusers SET password = %s WHERE user_id = %s", (hashed_pw, user_id))
 
 encrypt_all_user_passwords()
 
-
+# http://localhost:5000/ - main page
+@app.route('/')
+def index():
+    # check if user has loggin 
+    if 'loggedin' in session:
+        # if user already login it goes to home page
+        return redirect(url_for('home'))
+    else:
+        # if not login it goes to login page
+        return redirect(url_for('login'))
 
 # http://localhost:5000/login/ - this will be the login page, we need to use both GET and POST requests
 @app.route('/login/', methods=['GET', 'POST'])
@@ -63,8 +73,14 @@ def login():
                 session['loggedin'] = True
                 session['user_id'] = account['user_id']
                 session['username'] = account['username']
+                session['role_name'] = account['role_name']
                 # Redirect to home page
-                return redirect(url_for('home'))
+                if account['role_name'] == 'staff-admin':
+                   return redirect(url_for('admin'))
+                elif account['role_name'] == 'staff':
+                   return redirect(url_for('staff'))
+                else:
+                    return redirect(url_for('home'))
             else:
                 #password incorrect
                 msg = 'Incorrect password!'
@@ -79,7 +95,7 @@ def login():
 def logout():
     # Remove session data, this will log the user out
    session.pop('loggedin', None)
-   session.pop('id', None)
+   session.pop('user_id', None)
    session.pop('username', None)
    # Redirect to login page
    return redirect(url_for('login'))
@@ -133,11 +149,32 @@ def register():
 @app.route('/home')
 def home():
     # Check if user is loggedin
-    if 'loggedin' in session:
+    if 'loggedin' in session and session.get('role_name') == 'customer':
         # User is loggedin show them the home page
         return render_template('home.html', username=session['username'])
     # User is not loggedin redirect to login page
     return redirect(url_for('login'))
+
+
+@app.route('/admin')
+def admin():
+    # check if user logged in and is admin
+    if 'loggedin' in session and session.get('role_name') == 'staff-admin':
+        return render_template('admin.html', username=session['username'])
+    else:
+        # if its not admin back to login page
+        return redirect(url_for('login'))
+    
+
+@app.route('/staff')
+def staff():
+    # check if user logged in and is staff
+    if 'loggedin' in session and session.get('role_name') == 'staff':
+        return render_template('staff.html', username=session['username'])
+    else:
+        # if its not admin back to login page
+        return redirect(url_for('login'))    
+
 
 # http://localhost:5000/profile - this will be the profile page, only accessible for loggedin users
 @app.route('/profile')
