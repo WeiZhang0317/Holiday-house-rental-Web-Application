@@ -1,5 +1,5 @@
 import bcrypt
-from flask import Flask, render_template, request, redirect, url_for,session
+from flask import Flask, render_template, request, redirect, url_for,session,flash
 import re
 import mysql.connector
 from mysql.connector import FieldType
@@ -179,6 +179,45 @@ def profile():
         return render_template('profile.html', account=account, username=username )
     # User is not loggedin redirect to login page
     return redirect(url_for('login'))
+
+
+@app.route('/update_profile', methods=["GET", "POST"])
+def update_profile():
+    if 'loggedin' in session and session.get('role_name') == 'customer':
+        username = session['username']
+        cursor = getCursor(dictionary_cursor=True)
+
+        if request.method == 'GET':
+            cursor.execute('SELECT * FROM secureusers WHERE username = %s', (username,))
+            account = cursor.fetchone()
+            cursor.execute('SELECT c.address FROM secureusers AS s JOIN customer AS c ON s.user_id=c.user_id WHERE s.username = %s', (username,))
+            customer = cursor.fetchone()
+            return render_template('updateprofile.html', account=account, customer=customer)
+
+        elif request.method == 'POST':
+            name = request.form.get('name')
+            email = request.form.get('email')
+            phone_number = request.form.get('phone_number')
+            new_password = request.form.get('new_password')
+            address = request.form.get('address')
+
+            # Only update the password if a new one has been provided
+            if new_password:
+                hashed_password = encrypt_password(new_password)
+                cursor.execute("UPDATE secureusers SET password = %s WHERE username = %s", (hashed_password, username))
+
+            cursor.execute("UPDATE secureusers SET name = %s, email = %s, phone_number = %s WHERE username = %s", (name, email, phone_number, username))
+            if address:
+                cursor.execute("UPDATE customer SET address = %s WHERE user_id = (SELECT user_id FROM secureusers WHERE username = %s)", (address, username))
+
+            flash('Profile successfully updated.')
+            return redirect(url_for('profile'))
+
+    else:
+        return redirect(url_for('login'))
+
+
+  
 
 @app.route('/admin')
 def admin():
