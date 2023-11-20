@@ -78,9 +78,9 @@ def login():
                 session['role_name'] = account['role_name']
                 # Redirect to home page
                 if account['role_name'] == 'staff-admin':
-                   return redirect(url_for('admin'))
+                   return redirect(url_for('adminhome'))
                 elif account['role_name'] == 'staff':
-                   return redirect(url_for('staff'))
+                   return redirect(url_for('staffhome'))
                 else:
                     return redirect(url_for('home'))
             else:
@@ -197,51 +197,110 @@ def staffhome():
 def add_house():
     cursor = getCursor(dictionary_cursor=True)
    
+    #only staff or admin are able to add house
     if 'loggedin' in session and (session.get('role_name') == 'staff' or session.get('role_name') == 'staff-admin'):
+        # when click submit button it reuqest info from html 
         if request.method == 'POST':
             house_address = request.form['house_address']
             number_of_bedrooms = request.form['number_of_bedrooms']
             number_of_bathrooms = request.form['number_of_bathrooms']
             maximum_occupancy = request.form['maximum_occupancy']
             rental_per_night= request.form['rental_per_night']
-   
+            
+            #check if there is file called house_image
             if 'house_image' in request.files:
                 house_image = request.files['house_image']
-                if house_image.filename != '':
-                    filename = secure_filename(house_image.filename)
-                    house_image.save(os.path.join('path/to/save', filename))
-                    # 存储图片的文件名或路径到数据库
 
-           
-            cursor.execute('INSERT INTO holiday_houses (house_address, number_of_bedrooms, number_of_bathrooms,maximum_occupancy,rental_per_night,house_image) VALUES (%s, %s, %s, %s,%s, %s,)', 
-                           (house_address, number_of_bedrooms, number_of_bathrooms,maximum_occupancy,rental_per_night,house_image))
+                #make sure does not upload empty file
+                if house_image.filename != '':
+                    #make sure the file name is safe
+                    filename = secure_filename(house_image.filename)
+                    #file is going to be saved under static
+                    house_image.save(os.path.join('static', filename))
+                   
+        
+           #update database
+            cursor.execute('INSERT INTO holiday_houses (house_address, number_of_bedrooms, number_of_bathrooms, maximum_occupancy, rental_per_night, house_image) VALUES (%s, %s, %s, %s, %s, %s)', 
+               (house_address, number_of_bedrooms, number_of_bathrooms, maximum_occupancy, rental_per_night, filename))
+
 
             flash('New holiday house added successfully!')
             return redirect(url_for('staffhome'))
 
-        # 如果是 GET 请求，显示添加房屋的表单
-        return render_template('add_house_form.html')
+        
+        return render_template('staffhome-add.html')
 
-    # 如果用户未登录，重定向到登录页面
     return redirect(url_for('login'))
 
 
-# @app.route('/edit_house/<int:house_id>', methods=['GET', 'POST'])
-# def edit_house(house_id):
-#     if request.method == 'POST':
-#         # 更新数据库中的房屋信息
-#         # ...
-#         return redirect(url_for('staffhome'))
-#     # 获取房屋的当前信息以填充表单
-#     # ...
-#     return render_template('edit_house_form.html', house=house)
+@app.route('/edit_house/<int:house_id>', methods=['GET', 'POST'])
+def edit_house(house_id):
+    cursor = getCursor(dictionary_cursor=True)
+
+    if 'loggedin' in session and (session.get('role_name') == 'staff' or session.get('role_name') == 'staff-admin'):
+        if request.method == 'POST':
+            # Extract the data from the form submission
+            house_address = request.form['house_address']
+            number_of_bedrooms = request.form['number_of_bedrooms']
+            number_of_bathrooms = request.form['number_of_bathrooms']
+            maximum_occupancy = request.form['maximum_occupancy']
+            rental_per_night = request.form['rental_per_night']
+
+            # Assuming 'house_image' is optional
+            if 'house_image' in request.files and request.files['house_image'].filename != '':
+                house_image = request.files['house_image']
+                filename = secure_filename(house_image.filename)
+                house_image.save(os.path.join('static', filename))
+            else:
+                filename = None
+
+            # Update the house in the database
+            update_query = '''
+            UPDATE holiday_houses 
+            SET house_address = %s, number_of_bedrooms = %s, number_of_bathrooms = %s, 
+                maximum_occupancy = %s, rental_per_night = %s
+            '''
+            update_values = (house_address, number_of_bedrooms, number_of_bathrooms, maximum_occupancy, rental_per_night)
+
+            if filename:
+                update_query += ', house_image = %s'
+                update_values += (filename,)
+
+            update_query += ' WHERE house_id = %s'
+            update_values += (house_id,)
+
+            cursor.execute(update_query, update_values)
+
+            flash('House updated successfully!')
+            return redirect(url_for('staffhome'))
+
+        else:
+            # For a GET request, retrieve the current house data and display it in the form
+            cursor.execute('SELECT * FROM holiday_houses WHERE house_id = %s', (house_id,))
+            house = cursor.fetchone()
+            return render_template('staffhome-edit.html', house=house)
+
+    else:
+        return redirect(url_for('login'))
 
 
-# @app.route('/delete_house/<int:house_id>')
-# def delete_house(house_id):
-#     # 从数据库中删除房屋
-#     # ...
-#     return redirect(url_for('staffhome'))
+
+@app.route('/delete_house/<int:house_id>')
+def delete_house(house_id):
+    cursor = getCursor(dictionary_cursor=True)
+
+    # check if user is staff or admin
+    if 'loggedin' in session and (session.get('role_name') == 'staff' or session.get('role_name') == 'staff-admin'):
+        # execute delete
+        cursor.execute('DELETE FROM holiday_houses WHERE house_id = %s', (house_id,))
+        flash('Holiday house deleted successfully!')
+
+        return redirect(url_for('staffhome'))
+
+    else:
+        #if not login return to login page
+        return redirect(url_for('login'))
+
 
 
 
