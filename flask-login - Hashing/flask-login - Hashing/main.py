@@ -43,7 +43,7 @@ encrypt_all_user_passwords()
 
 # http://localhost:5000/ - main page
 @app.route('/')
-def index():
+def main():
     # check if user has loggin 
     if 'loggedin' in session:
         # if user already login it goes to home page
@@ -90,7 +90,7 @@ def login():
             # Account doesnt exist or username incorrect
             msg = 'Incorrect username'
     # Show the login form with message (if any)
-    return render_template('index.html', msg=msg)
+    return render_template('login.html', msg=msg)
 
 # http://localhost:5000/logout - this will be the logout page
 @app.route('/logout')
