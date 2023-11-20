@@ -36,8 +36,15 @@
                         <h6>Phone Number</h6>
                         <p class="text-muted">{{ account['phone_number'] }}</p>
                     </div>
+    
+                    <div class="mb-3">
+                        <h6>Address</h6>
+                        <p class="text-muted">{{ customer['address'] }}</p>
+                    </div>
                     <br>
-                         <a href="{{ url_for('update_profile') }}" >Edit profile</a>
+           
+                         <a href="{{ url_for('update_profile') }}"  class="btn btn-primary" >Edit profile</a>
+                         <a href="{{ url_for('updateprofile_password') }}"  class="btn btn-primary" >Generate a new password</a>
                    
 
                 </div>

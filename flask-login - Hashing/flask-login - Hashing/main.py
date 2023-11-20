@@ -4,6 +4,8 @@ import re
 import mysql.connector
 from mysql.connector import FieldType
 import connect
+from werkzeug.utils import secure_filename
+import os
 
 
 app = Flask(__name__)
@@ -118,7 +120,6 @@ def register():
         password = request.form['password']
         phone_number = request.form['phone_number']
         email = request.form['email']
-        role_name= request.form['role_name']
         # Check if account exists using MySQL
   
         cursor.execute('SELECT * FROM  secureusers  WHERE username = %s', (username,))
@@ -137,7 +138,7 @@ def register():
           
             password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
             print(password)
-            cursor.execute('INSERT INTO secureusers (username, name, email, password, phone_number, role_name) VALUES ( %s, %s, %s, %s, %s, %s)', (username,name,email,password,phone_number,role_name))
+            cursor.execute('INSERT INTO secureusers (username, name, email, password, phone_number, role_name) VALUES ( %s, %s, %s, %s, %s, %s)', (username,name,email,password,phone_number,'customer'))
             msg = 'You have successfully registered!'
     elif request.method == 'POST':
         # Form is empty... (no POST data)
@@ -167,23 +168,102 @@ def home():
     return redirect(url_for('login'))
 
 
+# http://localhost:5000/home - this will be the home page, only accessible for loggedin users
+@app.route('/staffhome')
+def staffhome():
+    cursor = getCursor(dictionary_cursor=True)
+    # Check if user is logged in
+    if 'loggedin' in session and (session.get('role_name') == 'staff' or session.get('role_name') == 'staff-admin'):
+
+        # User is logged in, show them the home page
+        username = session['username']
+        cursor.execute('SELECT * FROM secureusers WHERE username = %s', (username,))
+        account = cursor.fetchone()
+
+        # Retrieve holiday houses data from database
+        cursor.execute('SELECT * FROM holiday_houses')
+        holiday_houses = cursor.fetchall()
+
+        # Render the home template with account, username, and holiday houses data
+        return render_template('staffhome.html', account=account, username=username, holiday_houses=holiday_houses)
+    
+    # User is not logged in, redirect to login page
+    return redirect(url_for('login'))
+
+
+
+
+@app.route('/add_house', methods=['GET', 'POST'])
+def add_house():
+    cursor = getCursor(dictionary_cursor=True)
+   
+    if 'loggedin' in session and (session.get('role_name') == 'staff' or session.get('role_name') == 'staff-admin'):
+        if request.method == 'POST':
+            house_address = request.form['house_address']
+            number_of_bedrooms = request.form['number_of_bedrooms']
+            number_of_bathrooms = request.form['number_of_bathrooms']
+            maximum_occupancy = request.form['maximum_occupancy']
+            rental_per_night= request.form['rental_per_night']
+   
+            if 'house_image' in request.files:
+                house_image = request.files['house_image']
+                if house_image.filename != '':
+                    filename = secure_filename(house_image.filename)
+                    house_image.save(os.path.join('path/to/save', filename))
+                    # 存储图片的文件名或路径到数据库
+
+           
+            cursor.execute('INSERT INTO holiday_houses (house_address, number_of_bedrooms, number_of_bathrooms,maximum_occupancy,rental_per_night,house_image) VALUES (%s, %s, %s, %s,%s, %s,)', 
+                           (house_address, number_of_bedrooms, number_of_bathrooms,maximum_occupancy,rental_per_night,house_image))
+
+            flash('New holiday house added successfully!')
+            return redirect(url_for('staffhome'))
+
+        # 如果是 GET 请求，显示添加房屋的表单
+        return render_template('add_house_form.html')
+
+    # 如果用户未登录，重定向到登录页面
+    return redirect(url_for('login'))
+
+
+# @app.route('/edit_house/<int:house_id>', methods=['GET', 'POST'])
+# def edit_house(house_id):
+#     if request.method == 'POST':
+#         # 更新数据库中的房屋信息
+#         # ...
+#         return redirect(url_for('staffhome'))
+#     # 获取房屋的当前信息以填充表单
+#     # ...
+#     return render_template('edit_house_form.html', house=house)
+
+
+# @app.route('/delete_house/<int:house_id>')
+# def delete_house(house_id):
+#     # 从数据库中删除房屋
+#     # ...
+#     return redirect(url_for('staffhome'))
+
+
+
 @app.route('/profile')
 def profile():
     cursor = getCursor(dictionary_cursor=True)
     # Check if user is loggedin
-    if 'loggedin' in session and session.get('role_name') == 'customer':
+    if 'loggedin' in session :
         # User is loggedin show them the home page
         username=session['username']
         cursor.execute('SELECT * FROM  secureusers  WHERE username = %s', (username,))
         account = cursor.fetchone()
-        return render_template('profile.html', account=account, username=username )
+        cursor.execute('SELECT c.address FROM secureusers AS s JOIN customer AS c ON s.user_id=c.user_id WHERE s.username = %s', (username,))
+        customer = cursor.fetchone()
+        return render_template('profile.html', account=account, username=username, customer=customer )
     # User is not loggedin redirect to login page
     return redirect(url_for('login'))
 
 
 @app.route('/update_profile', methods=["GET", "POST"])
 def update_profile():
-    if 'loggedin' in session and session.get('role_name') == 'customer':
+    if 'loggedin' in session:
         username = session['username']
         cursor = getCursor(dictionary_cursor=True)
 
@@ -217,41 +297,42 @@ def update_profile():
         return redirect(url_for('login'))
 
 
-  
+@app.route('/updateprofile-password', methods=["GET", "POST"])
+def updateprofile_password():
+    if 'loggedin' in session:
+        username = session['username']
+        cursor = getCursor(dictionary_cursor=True)
+        
+        if request.method == 'POST':
+            new_password = request.form.get('new_password')
+            confirm_password = request.form.get('confirm_password')
 
-@app.route('/admin')
-def admin():
-    # check if user logged in and is admin
-    if 'loggedin' in session and session.get('role_name') == 'staff-admin':
-        return render_template('admin.html', username=session['username'])
+            # Check if the new password and confirmation password match
+            if new_password != confirm_password:
+                flash("New password and confirmation password do not match.", "error")
+                return redirect(url_for('updateprofile_password'))
+
+            # Hash the new password
+            hashed_password = encrypt_password(new_password)
+
+            # Update the password in the database
+            cursor.execute("UPDATE secureusers SET password = %s WHERE username = %s", (hashed_password, username))
+
+            flash('Password successfully updated.')
+            return redirect(url_for('profile'))
+
+        elif request.method == 'GET':
+            # If the request is a GET, simply render the update profile password page
+            return render_template('updateprofile-password.html')  
     else:
-        # if its not admin back to login page
         return redirect(url_for('login'))
-    
 
-@app.route('/staff')
-def staff():
-    # check if user logged in and is staff
-    if 'loggedin' in session and session.get('role_name') == 'staff':
-        return render_template('staff.html', username=session['username'])
-    else:
-        # if its not admin back to login page
-        return redirect(url_for('login'))    
+        
 
 
-# # http://localhost:5000/profile - this will be the profile page, only accessible for loggedin users
-# @app.route('/profile')
-# def profile():
-#     # Check if user is loggedin
-#     if 'loggedin' in session:
-#         # We need all the account info for the user so we can display it on the profile page
-#         cursor = getCursor()
-#         cursor.execute('SELECT * FROM secureaccount WHERE id = %s', (session['id'],))
-#         account = cursor.fetchone()
-#         # Show the profile page with account info
-#         return render_template('profile.html', account=account)
-#     # User is not loggedin redirect to login page
-#     return redirect(url_for('login'))
+
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)

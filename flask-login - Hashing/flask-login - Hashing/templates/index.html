@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <title>Login</title>
-        <!-- 引入Bootstrap CSS -->
+        <!-- Bootstrap CSS -->
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     </head>
     <body>
@@ -15,7 +15,7 @@
                             <h1>Login</h1>
                         </div>
                         <div class="card-body">
-                            <!-- 登录表单 -->
+                            <!-- login form-->
                             <form action="{{ url_for('login') }}" method="post">
                                 <div class="form-group">
                                     <label for="username">Username</label>
@@ -31,7 +31,7 @@
 							    </div>
 								<div class="msg">{{ msg }}</div>
                             </form>
-                            <!-- 导航链接 -->
+                            <!-- nevi-->
                             <div class="d-flex justify-content-around mt-4">
 								<p>Not a member? <a href="{{ url_for('register') }}" >Register</a>
                             </div>

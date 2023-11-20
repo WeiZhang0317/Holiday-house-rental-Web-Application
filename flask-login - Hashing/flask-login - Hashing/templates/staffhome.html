@@ -5,6 +5,11 @@
 {% block content %}
 
     <div class="container mt-4">
+
+        <div class="mb-3">
+            <a href="{{ url_for('add_house') }}" class="btn btn-success">Add a house</a>
+        </div>
+
         <div class="row">
             
             {% for house in holiday_houses %}
@@ -16,7 +21,11 @@
                             <!-- button to trigger folded info -->
                             <a href="#collapse{{ house.house_id }}" class="btn btn-primary mt-auto" data-toggle="collapse"
                              role="button" aria-expanded="false" aria-controls="collapse{{ house.house_id }}" onclick="toggleDetails(this)">View Details</a>
-
+                            
+                             <!-- <div class="card-body">
+                                <a href="{{ url_for('edit_house', house_id=house.house_id) }}" class="btn btn-primary">Edit</a>
+                                <a href="{{ url_for('delete_house', house_id=house.house_id) }}" class="btn btn-danger">Delete</a>
+                            </div> -->
 
                             <!-- folded info -->
                             <div class="collapse" id="collapse{{ house.house_id }}">
@@ -28,6 +37,8 @@
                                  
                                 </div>
                             </div>
+
+
                         </div>
                     </div>
                 </div>
