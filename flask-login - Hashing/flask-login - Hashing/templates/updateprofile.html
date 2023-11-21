@@ -21,11 +21,13 @@
             <label for="phone_number" class="form-label">Phone Number(Optional):</label>
             <input type="tel" id="phone_number" name="phone_number" value="{{ account['phone_number'] }}" class="form-control">
         </div>
-       
+        
+        {% if session['role_name'] == 'customer' %}
         <div class="form-group mb-4">
             <label for="address" class="form-label">Address(Optional):</label>
             <input type="text" id="address" name="address" value="{{ customer['address'] }}" class="form-control">
         </div>
+        {% endif %}
         <button type="submit" class="btn btn-primary">Update Profile</button>
         <a href="{{ url_for('profile') }}"  class="btn btn-primary" >Back</a>
     </form>

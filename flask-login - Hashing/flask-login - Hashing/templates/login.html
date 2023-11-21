@@ -24,21 +24,37 @@
                                 <div class="form-group">
                                     <label for="password">Password</label>
                                     <input type="password" class="form-control" name="password" id="password" placeholder="Password" required>
+                                    
+                                    <!-- add JS to change password to text when select "show password" -->
+                                    <input type="checkbox" onclick="showPassword()"> Show Password
                                 </div>
                                 
-								<div class="pt-1 mb-4">
-                                <button type="submit" class="btn btn-primary btn-block mb-4">Login</button>
-							    </div>
-								<div class="msg">{{ msg }}</div>
+                                <div class="pt-1 mb-4">
+                                    <button type="submit" class="btn btn-primary btn-block mb-4">Login</button>
+                                </div>
+                                <div class="msg">{{ msg }}</div>
                             </form>
                             <!-- nevi-->
                             <div class="d-flex justify-content-around mt-4">
-								<p>Not a member? <a href="{{ url_for('register') }}" >Register</a>
+                                <p>Not a member? <a href="{{ url_for('register') }}" >Register</a>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
+<!-- add JS to change password to text when select "show password" -->
+
+        <script>
+            function showPassword() {
+                var x = document.getElementById("password");
+                if (x.type === "password") {
+                    x.type = "text";
+                } else {
+                    x.type = "password";
+                }
+            }
+        </script>
     </body>
 </html>

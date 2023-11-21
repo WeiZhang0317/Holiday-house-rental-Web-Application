@@ -39,15 +39,26 @@ def encrypt_all_user_passwords():
             cursor.execute("UPDATE secureusers SET password = %s WHERE user_id = %s", (hashed_pw, user_id))
 
 
+def get_home_url_by_role():
+    role_name = session.get('role_name')
+    if role_name == 'customer':
+        return url_for('home')
+    elif role_name == 'staff':
+        return url_for('staffhome')
+    elif role_name == 'admin':
+        return url_for('adminhome')
+    
 encrypt_all_user_passwords()
 
 # http://localhost:5000/ - main page
 @app.route('/')
 def main():
     # check if user has loggin 
-    if 'loggedin' in session:
+    if 'loggedin' in session and session.get('role_name') == 'customer':
         # if user already login it goes to home page
         return redirect(url_for('home'))
+    elif 'loggedin' in session and session.get('role_name') == 'staff':
+        return redirect(url_for('staffhome'))
     else:
         # if not login it goes to login page
         return redirect(url_for('login'))
@@ -196,9 +207,10 @@ def staffhome():
 @app.route('/add_house', methods=['GET', 'POST'])
 def add_house():
     cursor = getCursor(dictionary_cursor=True)
-   
+    
     #only staff or admin are able to add house
     if 'loggedin' in session and (session.get('role_name') == 'staff' or session.get('role_name') == 'staff-admin'):
+        home_url=get_home_url_by_role()
         # when click submit button it reuqest info from html 
         if request.method == 'POST':
             house_address = request.form['house_address']
@@ -228,7 +240,7 @@ def add_house():
             return redirect(url_for('staffhome'))
 
         
-        return render_template('staffhome-add.html')
+        return render_template('staffhome-add.html',home_url=home_url)
 
     return redirect(url_for('login'))
 
@@ -238,6 +250,7 @@ def edit_house(house_id):
     cursor = getCursor(dictionary_cursor=True)
 
     if 'loggedin' in session and (session.get('role_name') == 'staff' or session.get('role_name') == 'staff-admin'):
+        home_url=get_home_url_by_role()
         if request.method == 'POST':
             # Extract the data from the form submission
             house_address = request.form['house_address']
@@ -278,7 +291,7 @@ def edit_house(house_id):
             # For a GET request, retrieve the current house data and display it in the form
             cursor.execute('SELECT * FROM holiday_houses WHERE house_id = %s', (house_id,))
             house = cursor.fetchone()
-            return render_template('staffhome-edit.html', house=house)
+            return render_template('staffhome-edit.html', house=house, home_url=home_url)
 
     else:
         return redirect(url_for('login'))
@@ -304,6 +317,8 @@ def delete_house(house_id):
 
 
 
+
+# The profile function is for all of the users, as they are logged in, customers, staff and admin all can view their profile and edit it
 @app.route('/profile')
 def profile():
     cursor = getCursor(dictionary_cursor=True)
@@ -315,7 +330,11 @@ def profile():
         account = cursor.fetchone()
         cursor.execute('SELECT c.address FROM secureusers AS s JOIN customer AS c ON s.user_id=c.user_id WHERE s.username = %s', (username,))
         customer = cursor.fetchone()
-        return render_template('profile.html', account=account, username=username, customer=customer )
+        cursor.execute('SELECT s.username,staff.staff_number,staff.date_joined FROM staff JOIN secureusers AS s ON staff.user_id=s.user_id  WHERE s.username = %s', (username,))
+        staff = cursor.fetchone()
+        home_url = get_home_url_by_role()  
+
+        return render_template('profile.html', account=account, username=username, customer=customer,staff=staff, home_url=home_url )
     # User is not loggedin redirect to login page
     return redirect(url_for('login'))
 
@@ -325,13 +344,13 @@ def update_profile():
     if 'loggedin' in session:
         username = session['username']
         cursor = getCursor(dictionary_cursor=True)
-
+        home_url = get_home_url_by_role()  
         if request.method == 'GET':
             cursor.execute('SELECT * FROM secureusers WHERE username = %s', (username,))
             account = cursor.fetchone()
             cursor.execute('SELECT c.address FROM secureusers AS s JOIN customer AS c ON s.user_id=c.user_id WHERE s.username = %s', (username,))
             customer = cursor.fetchone()
-            return render_template('updateprofile.html', account=account, customer=customer)
+            return render_template('updateprofile.html', account=account, customer=customer,home_url=home_url)
 
         elif request.method == 'POST':
             name = request.form.get('name')
@@ -358,6 +377,7 @@ def update_profile():
 
 @app.route('/updateprofile-password', methods=["GET", "POST"])
 def updateprofile_password():
+    home_url = get_home_url_by_role() 
     if 'loggedin' in session:
         username = session['username']
         cursor = getCursor(dictionary_cursor=True)
@@ -382,14 +402,26 @@ def updateprofile_password():
 
         elif request.method == 'GET':
             # If the request is a GET, simply render the update profile password page
-            return render_template('updateprofile-password.html')  
+            return render_template('updateprofile-password.html',home_url=home_url)  
     else:
         return redirect(url_for('login'))
 
         
 
+@app.route('/viewcustomer')
+def viewcustomer():
+    
+    if 'loggedin' in session and session.get('role_name') == 'staff':
+        cursor = getCursor(dictionary_cursor=True)
+        
+        
+        cursor.execute("SELECT s.*, c.address FROM secureusers s JOIN customer c ON s.user_id = c.user_id where role_name='customer'")
+        customers = cursor.fetchall()  
+        home_url = get_home_url_by_role()  
+        return render_template('viewcustomer.html', customers=customers,home_url=home_url)
 
-
+    else:
+        return redirect(url_for('login'))
 
 
 

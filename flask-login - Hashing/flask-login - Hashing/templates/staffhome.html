@@ -1,13 +1,20 @@
-{% extends 'layout-staff.html' %}
 
-{% block title %}Holiday Houses{% endblock %}
+<!-- This html is the homepage for staff, when a user login as a staff, it shows the homepage, which including
+function of view different hosues, add/edit/delete houeses, nevi bar to lead to profile page, please see layout-staff html page -->
+
+{% extends 'layout.html' %}
+
 
 {% block content %}
 
     <div class="container mt-4">
 
-        <div class="mb-3">
+        <!-- <div class="mb-3">
             <a href="{{ url_for('add_house') }}" class="btn btn-success">Add a house</a>
+        </div> -->
+
+        <div class="mb-3 d-flex justify-content-end">
+            <a href="{{ url_for('add_house') }}" class="btn btn-outline-info">Add a House</a>
         </div>
 
         <div class="row">
@@ -15,17 +22,17 @@
             {% for house in holiday_houses %}
                 <div class="col-md-4 mb-4 d-flex align-items-stretch">
                     <div class="card w-100">
-                        <img src="{{ url_for('static', filename=house.house_image) }}" class="card-img-top" alt="House Image">
+                     
+                        <img src="{{ url_for('static', filename=house.house_image) }}" class="card-img-top img-fluid" alt="House Image" style="height: 200px; object-fit: cover;">
                         <div class="card-body d-flex flex-column">
                             <h5 class="card-title" style="height: 60px;">{{ house.house_address }}</h5>
+
+                           
                             <!-- button to trigger folded info -->
                             <a href="#collapse{{ house.house_id }}" class="btn btn-primary mt-auto" data-toggle="collapse"
                              role="button" aria-expanded="false" aria-controls="collapse{{ house.house_id }}" onclick="toggleDetails(this)">View Details</a>
                             
-                             <div class="card-body">
-                                <a href="{{ url_for('edit_house', house_id=house.house_id) }}" class="btn btn-primary">Edit</a>
-                                <a href="{{ url_for('delete_house', house_id=house.house_id) }}" class="btn btn-danger">Delete</a>
-                            </div>
+                            
 
                             <!-- folded info -->
                             <div class="collapse" id="collapse{{ house.house_id }}">
@@ -38,6 +45,10 @@
                                 </div>
                             </div>
 
+                            <div class="card-body">
+                                <a href="{{ url_for('edit_house', house_id=house.house_id) }}" class="btn btn-primary " >Edit</a>
+                                <a href="{{ url_for('delete_house', house_id=house.house_id) }}" class="btn btn-danger">Delete</a>
+                            </div>
 
                         </div>
                     </div>

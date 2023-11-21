@@ -1,0 +1,25 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Customer Profiles</h2>
+
+    <div class="row">
+        {% for customer in customers %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="card-title">{{ customer['name'] }}</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text"><strong>Username:</strong> {{ customer['username'] }}</p>
+                    <p class="card-text"><strong>Email:</strong> {{ customer['email'] }}</p>
+                    <p class="card-text"><strong>Phone Number:</strong> {{ customer['phone_number'] }}</p>
+                    <p class="card-text"><strong>Address:</strong> {{ customer['address'] }}</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
