@@ -17,7 +17,12 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ml-auto">
 				    {% if session['role_name'] == 'staff' %}
-                    <li class="nav-item mr-3"><a class="navbar-brand" href="{{ url_for('viewcustomer') }}">CustomerProfiles</a></li>
+                    <li class="nav-item mr-3"><a class="navbar-brand" href="{{ url_for('viewcustomer') }}">ViewCustomer</a></li>
+                    {% endif %}
+
+                    {% if session['role_name'] == 'staff-admin' %}
+                    <li class="nav-item mr-3"><a class="navbar-brand" href="{{ url_for('editcustomer') }}">ManageCustomer</a></li>
+                   
                     {% endif %}
 					<li class="nav-item mr-3"><a class="navbar-brand" href="{{ url_for('profile') }}">MyProfile</a></li>
                     <li class="nav-item mr-3"><a class="navbar-brand" href="{{ url_for('logout') }}">Logout</a></li>

@@ -16,7 +16,8 @@
                     <p class="card-text"><strong>Email:</strong> {{ customer['email'] }}</p>
                     <p class="card-text"><strong>Phone Number:</strong> {{ customer['phone_number'] }}</p>  
                     <p class="card-text"><strong>Address:</strong> {{ customer['address'] }}</p>
-                
+                    <a href="{{ url_for('edit_customer_page', customer_id=customer['user_id']) }}" class="btn btn-outline-primary btn-sm">Edit</a>
+                    <a href="{{ url_for('delete_customer', customer_id=customer['user_id']) }}" class="btn btn-outline-primary btn-sm">Delete</a>
                 </div>
             </div>
         </div>

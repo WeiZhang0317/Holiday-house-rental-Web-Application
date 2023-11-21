@@ -46,7 +46,7 @@ def get_home_url_by_role():
     elif role_name == 'staff':
         return url_for('staffhome')
     elif role_name == 'admin':
-        return url_for('adminhome')
+        return url_for('staffhome')
     
 encrypt_all_user_passwords()
 
@@ -89,7 +89,7 @@ def login():
                 session['role_name'] = account['role_name']
                 # Redirect to home page
                 if account['role_name'] == 'staff-admin':
-                   return redirect(url_for('adminhome'))
+                   return redirect(url_for('staffhome'))
                 elif account['role_name'] == 'staff':
                    return redirect(url_for('staffhome'))
                 else:
@@ -423,6 +423,66 @@ def viewcustomer():
     else:
         return redirect(url_for('login'))
 
+@app.route('/editcustomer')
+def editcustomer():
+    
+    if 'loggedin' in session and session.get('role_name') == 'staff-admin':
+        cursor = getCursor(dictionary_cursor=True)
+        
+        
+        cursor.execute("SELECT s.*, c.address FROM secureusers s JOIN customer c ON s.user_id = c.user_id where role_name='customer'")
+        customers = cursor.fetchall()  
+        home_url = get_home_url_by_role()  
+        return render_template('editcustomer.html', customers=customers,home_url=home_url)
+
+    else:
+        return redirect(url_for('login'))
+    
+
+@app.route('/edit_customer_page/<int:customer_id>', methods=['GET', 'POST'])
+def edit_customer_page(customer_id):
+    if 'loggedin' in session and session.get('role_name') == 'staff-admin':
+        cursor = getCursor(dictionary_cursor=True)
+        if request.method == 'GET':
+            cursor.execute('SELECT s.*, c.address FROM secureusers s JOIN customer c ON s.user_id = c.user_id WHERE s.role_name = %s AND s.user_id = %s', ('customer', customer_id))
+            customer = cursor.fetchone()
+            home_url = get_home_url_by_role() 
+            return render_template('edit_customer_page.html', customer=customer,home_url=home_url)
+        elif request.method == 'POST':
+            username = request.form.get('username')
+            name = request.form.get('name')
+            email = request.form.get('email')
+            phone_number = request.form.get('phone_number')
+            address = request.form.get('address')
+
+            cursor.execute('UPDATE secureusers SET username = %s, name = %s, email = %s, phone_number = %s WHERE user_id = %s',
+                           (username, name, email, phone_number, customer_id))
+            cursor.execute('UPDATE customer SET address = %s WHERE user_id = %s',
+                           (address))
+
+            return redirect(url_for('editcustomer'))           
+
+    else:
+        return redirect(url_for('login'))    
+    
+
+
+@app.route('/delete_customer/<int:customer_id>')
+def delete_customer(customer_id):
+    cursor = getCursor(dictionary_cursor=True)
+
+    # check if user is staff or admin
+    if 'loggedin' in session and session.get('role_name') == 'staff-admin':
+        # execute delete
+        cursor.execute('DELETE FROM secureusers WHERE user_id = %s', (customer_id,))
+        cursor.execute('DELETE FROM customer WHERE user_id = %s', (customer_id,))
+        flash('Customer deleted successfully!')
+
+        return redirect(url_for('editcustomer'))
+
+    else:
+        #if not login return to login page
+        return redirect(url_for('login'))
 
 
 if __name__ == '__main__':
