@@ -507,25 +507,29 @@ def edit_customer_add():
     
 
 
-
-
-
 @app.route('/delete_customer/<int:customer_id>')
 def delete_customer(customer_id):
     cursor = getCursor(dictionary_cursor=True)
 
-    # check if user is staff or admin
     if 'loggedin' in session and session.get('role_name') == 'staff-admin':
-        # execute delete
-        cursor.execute('DELETE FROM secureusers WHERE user_id = %s', (customer_id,))
-        cursor.execute('DELETE FROM customer WHERE user_id = %s', (customer_id,))
-        flash('Customer deleted successfully!')
+        try:
+            # 先从 customer 表删除相关记录
+            cursor.execute('DELETE FROM customer WHERE user_id = %s', (customer_id,))
+
+            # 然后从 secureusers 表删除相关记录
+            cursor.execute('DELETE FROM secureusers WHERE user_id = %s', (customer_id,))
+
+            flash('Customer deleted successfully!')
+        except mysql.connector.Error as err:
+            flash(f'Error occurred: {err}', 'error')
+        finally:
+            cursor.close()
 
         return redirect(url_for('editcustomer'))
 
     else:
-        #if not login return to login page
         return redirect(url_for('login'))
+
 
 
 if __name__ == '__main__':
