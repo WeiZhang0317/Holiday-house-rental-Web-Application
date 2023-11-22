@@ -45,8 +45,10 @@ def get_home_url_by_role():
         return url_for('home')
     elif role_name == 'staff':
         return url_for('staffhome')
-    elif role_name == 'admin':
+    elif role_name == 'staff-admin':
         return url_for('staffhome')
+
+
     
 encrypt_all_user_passwords()
 
@@ -458,13 +460,54 @@ def edit_customer_page(customer_id):
             cursor.execute('UPDATE secureusers SET username = %s, name = %s, email = %s, phone_number = %s WHERE user_id = %s',
                            (username, name, email, phone_number, customer_id))
             cursor.execute('UPDATE customer SET address = %s WHERE user_id = %s',
-                           (address))
+                           (address, customer_id))
 
             return redirect(url_for('editcustomer'))           
 
     else:
         return redirect(url_for('login'))    
     
+
+@app.route('/edit_customer_add', methods=['GET', 'POST'])
+def edit_customer_add():
+   
+    
+    #only staff or admin are able to add house
+    if 'loggedin' in session and  session.get('role_name') == 'staff-admin':
+        cursor = getCursor(dictionary_cursor=True)
+        if request.method == 'GET':
+            home_url = get_home_url_by_role() 
+            return render_template('edit_customer_add.html', home_url=home_url)
+        elif request.method == 'POST':
+            username = request.form.get('username')
+            name = request.form.get('name')
+            email = request.form.get('email')
+            phone_number = request.form.get('phone_number')
+            address = request.form.get('address')
+            customernumber = request.form.get('customernumber')
+
+            encrypted_password = encrypt_password('123456') 
+        
+
+        
+            cursor.execute ('INSERT INTO secureusers (username, name, email, phone_number, password, role_name) VALUES (%s, %s, %s, %s, %s, %s)', (username, name, email, phone_number, encrypted_password, 'customer'))
+           
+            cursor.execute('SELECT user_id FROM secureusers WHERE username = %s', (username,))
+            user_id = cursor.fetchone()['user_id']  # 获取 user_id
+            cursor.execute('INSERT INTO customer (customer_number, address, user_id) VALUES (%s, %s, %s)', (customernumber, address, user_id))
+            flash('New customer added successfully! The default customer password is 123456')
+
+
+
+
+            return redirect(url_for('edit_customer_add'))           
+
+    else:
+        return redirect(url_for('login'))    
+    
+
+
+
 
 
 @app.route('/delete_customer/<int:customer_id>')
