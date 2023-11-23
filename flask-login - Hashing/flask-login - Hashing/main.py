@@ -462,7 +462,7 @@ def edit_customer_page(customer_id):
                            (username, name, email, phone_number, customer_id))
             cursor.execute('UPDATE customer SET address = %s WHERE user_id = %s',
                            (address, customer_id))
-            flash('Customer editted successfully! ','delete,edit')
+            flash('Customer editted successfully! ','delete,edit,add')
             return redirect(url_for('editcustomer'))           
 
     else:
@@ -495,14 +495,15 @@ def edit_customer_add():
             cursor.execute ('INSERT INTO secureusers (username, name, email, phone_number, password, role_name) VALUES (%s, %s, %s, %s, %s, %s)', (username, name, email, phone_number, encrypted_password, 'customer'))
            
             cursor.execute('SELECT user_id FROM secureusers WHERE username = %s', (username,))
-            user_id = cursor.fetchone()['user_id']  # 获取 user_id
+            user_id = cursor.fetchone()['user_id'] 
+            cursor.fetchall()   # Clearing the result set 
             cursor.execute('INSERT INTO customer (customer_number, address, user_id) VALUES (%s, %s, %s)', (customernumber, address, user_id))
-            flash('New customer added successfully! The default password is 123456, please contact user to update their password. ','add')
+            flash('New customer added successfully! The default password is 123456, please contact user to update their password. ','delete,edit,add')
 
 
 
 
-            return redirect(url_for('edit_customer_add'))           
+            return redirect(url_for('editcustomer'))           
 
     else:
         return redirect(url_for('login'))    
@@ -521,7 +522,7 @@ def delete_customer(customer_id):
             # delete from the parent table secureusers 
             cursor.execute('DELETE FROM secureusers WHERE user_id = %s', (customer_id,))
 
-            flash('Customer deleted successfully!','delete,edit')
+            flash('Customer deleted successfully!','delete,edit,add')
         except mysql.connector.Error as err:
             flash(f'Error occurred: {err}', 'error')
         finally:
