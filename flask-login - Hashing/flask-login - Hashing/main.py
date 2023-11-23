@@ -8,6 +8,7 @@ from werkzeug.utils import secure_filename
 import os
 
 
+
 app = Flask(__name__)
 app.secret_key = 'zxw secret key'
 
@@ -238,7 +239,7 @@ def add_house():
                (house_address, number_of_bedrooms, number_of_bathrooms, maximum_occupancy, rental_per_night, filename))
 
 
-            flash('New holiday house added successfully!')
+            flash('New holiday house added successfully!','house')
             return redirect(url_for('staffhome'))
 
         
@@ -286,7 +287,7 @@ def edit_house(house_id):
 
             cursor.execute(update_query, update_values)
 
-            flash('House updated successfully!')
+            flash('House updated successfully!','house')
             return redirect(url_for('staffhome'))
 
         else:
@@ -308,7 +309,7 @@ def delete_house(house_id):
     if 'loggedin' in session and (session.get('role_name') == 'staff' or session.get('role_name') == 'staff-admin'):
         # execute delete
         cursor.execute('DELETE FROM holiday_houses WHERE house_id = %s', (house_id,))
-        flash('Holiday house deleted successfully!')
+        flash('Holiday house deleted successfully!','house')
 
         return redirect(url_for('staffhome'))
 
@@ -461,7 +462,7 @@ def edit_customer_page(customer_id):
                            (username, name, email, phone_number, customer_id))
             cursor.execute('UPDATE customer SET address = %s WHERE user_id = %s',
                            (address, customer_id))
-
+            flash('Customer editted successfully! ','delete,edit')
             return redirect(url_for('editcustomer'))           
 
     else:
@@ -476,6 +477,7 @@ def edit_customer_add():
     if 'loggedin' in session and  session.get('role_name') == 'staff-admin':
         cursor = getCursor(dictionary_cursor=True)
         if request.method == 'GET':
+            
             home_url = get_home_url_by_role() 
             return render_template('edit_customer_add.html', home_url=home_url)
         elif request.method == 'POST':
@@ -495,7 +497,7 @@ def edit_customer_add():
             cursor.execute('SELECT user_id FROM secureusers WHERE username = %s', (username,))
             user_id = cursor.fetchone()['user_id']  # 获取 user_id
             cursor.execute('INSERT INTO customer (customer_number, address, user_id) VALUES (%s, %s, %s)', (customernumber, address, user_id))
-            flash('New customer added successfully! The default customer password is 123456')
+            flash('New customer added successfully! The default password is 123456, please contact user to update their password. ','add')
 
 
 
@@ -513,13 +515,13 @@ def delete_customer(customer_id):
 
     if 'loggedin' in session and session.get('role_name') == 'staff-admin':
         try:
-            # 先从 customer 表删除相关记录
+           #delete from the child tabble customer
             cursor.execute('DELETE FROM customer WHERE user_id = %s', (customer_id,))
 
-            # 然后从 secureusers 表删除相关记录
+            # delete from the parent table secureusers 
             cursor.execute('DELETE FROM secureusers WHERE user_id = %s', (customer_id,))
 
-            flash('Customer deleted successfully!')
+            flash('Customer deleted successfully!','delete,edit')
         except mysql.connector.Error as err:
             flash(f'Error occurred: {err}', 'error')
         finally:
@@ -530,6 +532,127 @@ def delete_customer(customer_id):
     else:
         return redirect(url_for('login'))
 
+
+@app.route('/editstaff')
+def editstaff():
+    
+    if 'loggedin' in session and session.get('role_name') == 'staff-admin':
+        cursor = getCursor(dictionary_cursor=True)
+        
+        
+        cursor.execute("SELECT s.*, staff.date_joined,staff.staff_number FROM secureusers s JOIN staff ON s.user_id = staff.user_id ")
+        staffs = cursor.fetchall()  
+        home_url = get_home_url_by_role()  
+        return render_template('editstaff.html', staffs=staffs,home_url=home_url)
+
+    else:
+        return redirect(url_for('login'))
+    
+
+
+
+    
+
+@app.route('/edit_staff_page/<int:staff_id>', methods=['GET', 'POST'])
+def edit_staff_page(staff_id):
+    if 'loggedin' in session and session.get('role_name') == 'staff-admin':
+        cursor = getCursor(dictionary_cursor=True)
+        if request.method == 'GET':
+            cursor.execute("SELECT s.*, staff.date_joined FROM secureusers s JOIN staff ON s.user_id = staff.user_id  WHERE  s.user_id = %s", (staff_id,))
+            staff = cursor.fetchone()
+            home_url = get_home_url_by_role() 
+            return render_template('edit_staff_page.html', staff=staff,home_url=home_url)
+        elif request.method == 'POST':
+            username = request.form.get('username')
+            name = request.form.get('name')
+            email = request.form.get('email')
+            phone_number = request.form.get('phone_number')
+            date_joined = request.form.get('date_joined')
+            staff_number = request.form.get('staff_number')
+            role_name = request.form.get('role_name')
+            cursor.execute('UPDATE secureusers SET username = %s, name = %s, email = %s, phone_number = %s,  role_name =%s WHERE user_id = %s',
+                           (username, name, email, phone_number, role_name, staff_id))
+            cursor.execute('UPDATE staff SET date_joined = %s, staff_number=%s WHERE user_id = %s',
+                           (date_joined,staff_number, staff_id))
+            flash('Staff editted successfully! ','staffdelete,edit')
+            return redirect(url_for('editstaff'))           
+
+    else:
+        return redirect(url_for('login'))    
+    
+@app.route('/edit_staff_add', methods=['GET', 'POST'])
+def edit_staff_add():
+    if 'loggedin' in session and session.get('role_name') == 'staff-admin':
+        cursor = getCursor(dictionary_cursor=True)
+
+        if request.method == 'GET':
+            home_url = get_home_url_by_role() 
+            return render_template('edit_staff_add.html', home_url=home_url)
+
+        elif request.method == 'POST':
+            try:
+                username = request.form.get('username')
+                name = request.form.get('name')
+                email = request.form.get('email')
+                phone_number = request.form.get('phone_number')
+                date_joined = request.form.get('date_joined')
+                staff_number = request.form.get('staff_number')
+                role_name = request.form.get('role_name')
+                encrypted_password = encrypt_password('56789') 
+
+                # Insert into secureusers
+                cursor.execute('INSERT INTO secureusers (username, name, email, phone_number, password, role_name) VALUES (%s, %s, %s, %s, %s, %s)', (username, name, email, phone_number, encrypted_password, role_name))
+                
+
+                # Get user_id
+                cursor.execute('SELECT user_id FROM secureusers WHERE username = %s', (username,))
+                user_id = cursor.fetchone()['user_id']
+                cursor.fetchall()  # Clearing the result set
+
+                # Insert into staff
+                cursor.execute('INSERT INTO staff (staff_number, date_joined, user_id) VALUES (%s, %s, %s)', (staff_number, date_joined, user_id))
+              
+
+                flash('New staff added successfully! The default password is 56789, please contact user to update their password.', 'staffadd')
+
+            except Exception as e:
+                # Handle any exceptions that occur
+                print("An error occurred:", e)
+                flash('An error occurred while adding staff.', 'error')
+
+            finally:
+                # Close the cursor after operations
+                if cursor:
+                    cursor.close()
+
+            return redirect(url_for('edit_staff_add'))           
+
+    else:
+        return redirect(url_for('login'))
+
+
+@app.route('/delete_staff/<int:staff_id>')
+def delete_staff(staff_id):
+    cursor = getCursor(dictionary_cursor=True)
+
+    if 'loggedin' in session and session.get('role_name') == 'staff-admin':
+        try:
+           #delete from the child tabble customer
+            cursor.execute('DELETE FROM staff WHERE user_id = %s', (staff_id,))
+
+            # delete from the parent table secureusers 
+            cursor.execute('DELETE FROM secureusers WHERE user_id = %s', (staff_id,))
+
+            flash('Staff deleted successfully!','staffdelete,edit')
+        except mysql.connector.Error as err:
+            flash(f'Error occurred: {err}', 'error')
+        finally:
+            cursor.close()
+
+        return redirect(url_for('editstaff'))
+
+    else:
+        return redirect(url_for('login'))
 
 
 if __name__ == '__main__':

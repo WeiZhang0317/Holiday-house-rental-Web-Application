@@ -1,0 +1,42 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Manage Staff Profiles</h2>
+    
+    <div class="mb-3 d-flex justify-content-end">
+        <a href="{{ url_for('edit_staff_add') }}" class="btn btn-outline-success">Add a Staff</a>
+    </div>
+
+    <div class="row">
+        {% for staff in staffs %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="card-title">{{ staff['name'] }}</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text"><strong>Username:</strong> {{ staff['username'] }}</p>
+                    <p class="card-text"><strong>Email:</strong> {{ staff['email'] }}</p>
+                    <p class="card-text"><strong>Phone Number:</strong> {{ staff['phone_number'] }}</p>  
+                    <p class="card-text"><strong>Joined Date:</strong> {{ staff['date_joined'] }}</p>
+                    <p class="card-text"><strong>Staff Number:</strong> {{ staff['staff_number'] }}</p>
+                    <a href="{{ url_for('edit_staff_page', staff_id=staff['user_id']) }}" class="btn btn-outline-primary btn-sm">Edit</a>
+                    <a href="{{ url_for('delete_staff', staff_id=staff['user_id']) }}" class="btn btn-outline-danger btn-sm">Delete</a>
+
+                 
+
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+
+    {% for message in get_flashed_messages(category_filter=["staffdelete,edit"]) %}
+    <div class="alert alert-info">
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -21,8 +21,9 @@
                     {% endif %}
 
                     {% if session['role_name'] == 'staff-admin' %}
+                    
                     <li class="nav-item mr-3"><a class="navbar-brand" href="{{ url_for('editcustomer') }}">ManageCustomer</a></li>
-                   
+                    <li class="nav-item mr-3"><a class="navbar-brand" href="{{ url_for('editstaff') }}">ManageStaff</a></li>
                     {% endif %}
 					<li class="nav-item mr-3"><a class="navbar-brand" href="{{ url_for('profile') }}">MyProfile</a></li>
                     <li class="nav-item mr-3"><a class="navbar-brand" href="{{ url_for('logout') }}">Logout</a></li>

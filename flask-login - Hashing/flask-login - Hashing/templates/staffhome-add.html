@@ -4,6 +4,13 @@
 <div class="container mt-4">
     <h2>Add New Holiday House</h2>
     <form method="POST" enctype="multipart/form-data">
+
+        {% for message in get_flashed_messages(category_filter=["add"]) %}
+        <div class="alert alert-info">
+            {{ message }}
+        </div>
+        {% endfor %}
+
         <div class="form-group">
             <label for="house_address">Address:</label>
             <input type="text" class="form-control" id="house_address" name="house_address" required>

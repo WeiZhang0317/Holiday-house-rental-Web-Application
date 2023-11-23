@@ -5,7 +5,7 @@
     <h2 class="mb-4">Customer Profiles</h2>
     
     <div class="mb-3 d-flex justify-content-end">
-        <a href="{{ url_for('edit_customer_add') }}" class="btn btn-outline-info">Add a Customer</a>
+        <a href="{{ url_for('edit_customer_add') }}" class="btn btn-outline-success">Add a Customer</a>
     </div>
 
     <div class="row">
@@ -21,11 +21,21 @@
                     <p class="card-text"><strong>Phone Number:</strong> {{ customer['phone_number'] }}</p>  
                     <p class="card-text"><strong>Address:</strong> {{ customer['address'] }}</p>
                     <a href="{{ url_for('edit_customer_page', customer_id=customer['user_id']) }}" class="btn btn-outline-primary btn-sm">Edit</a>
-                    <a href="{{ url_for('delete_customer', customer_id=customer['user_id']) }}" class="btn btn-outline-primary btn-sm">Delete</a>
+                    <a href="{{ url_for('delete_customer', customer_id=customer['user_id']) }}" class="btn btn-outline-danger btn-sm">Delete</a>
+
+                 
+
                 </div>
             </div>
         </div>
         {% endfor %}
     </div>
+
+
+    {% for message in get_flashed_messages(category_filter=["delete,edit"]) %}
+    <div class="alert alert-info">
+        {{ message }}
+    </div>
+    {% endfor %}
 </div>
 {% endblock %}

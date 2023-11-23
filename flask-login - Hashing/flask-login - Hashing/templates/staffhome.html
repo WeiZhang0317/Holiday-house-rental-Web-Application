@@ -9,16 +9,19 @@ function of view different hosues, add/edit/delete houeses, nevi bar to lead to 
 
     <div class="container mt-4">
 
-        <!-- <div class="mb-3">
-            <a href="{{ url_for('add_house') }}" class="btn btn-success">Add a house</a>
-        </div> -->
 
         <div class="mb-3 d-flex justify-content-end">
             <a href="{{ url_for('add_house') }}" class="btn btn-outline-info">Add a House</a>
         </div>
+        
+        {% for message in get_flashed_messages(category_filter=["house"]) %}
+        <div class="alert alert-info">{{ message }}</div>
+       {% endfor %}
+       
 
         <div class="row">
-            
+        
+
             {% for house in holiday_houses %}
                 <div class="col-md-4 mb-4 d-flex align-items-stretch">
                     <div class="card w-100">
@@ -55,6 +58,9 @@ function of view different hosues, add/edit/delete houeses, nevi bar to lead to 
                 </div>
             {% endfor %}
         </div>
+
+
+
     </div>
 
     
