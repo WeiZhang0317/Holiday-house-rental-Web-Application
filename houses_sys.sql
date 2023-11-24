@@ -16,54 +16,7 @@ CREATE TABLE IF NOT EXISTS holiday_houses
   rental_per_night DECIMAL(10, 2),
   house_image VARCHAR(500)
 );
-
-
-
-/* ----- Create the tables USERS: ----- */
-CREATE TABLE IF NOT EXISTS Users
-(
-  user_id INT PRIMARY KEY AUTO_INCREMENT,
-  username VARCHAR(100) NOT NULL,
-  name VARCHAR(100),
-  email VARCHAR(100) NOT NULL,
-  password VARCHAR(100) NOT NULL,
-  phone_number VARCHAR(20),
-  role_name VARCHAR(50) NOT NULL
-);
-
-ALTER TABLE Users AUTO_INCREMENT = 101;
-
-/* ----- Create the tables secureusers: ----- */
-CREATE TABLE IF NOT EXISTS secureusers
-(
-  user_id INT PRIMARY KEY AUTO_INCREMENT,
-  username VARCHAR(100) NOT NULL,
-  name VARCHAR(100),
-  email VARCHAR(100) NOT NULL,
-  password VARCHAR(255) NOT NULL,
-  phone_number VARCHAR(20),
-  role_name VARCHAR(50) NOT NULL
-);
-
-ALTER TABLE secureusers AUTO_INCREMENT = 101;
-
-/* ----- Create the tables Staffs: ----- */
-CREATE TABLE IF NOT EXISTS Staff
-(
-  staff_number VARCHAR(50) PRIMARY KEY,
-  date_joined DATE NOT NULL,
-  user_id INT,  
-  FOREIGN KEY (user_id) REFERENCES Users(user_id)  
-);
-
-/* ----- Create the tables customers: ----- */
-CREATE TABLE IF NOT EXISTS customer
-(
-  customer_number VARCHAR(50) PRIMARY KEY,
-  address VARCHAR(1000),
-  user_id INT,  
-  FOREIGN KEY (user_id) REFERENCES Users(user_id)  
-);
+ALTER TABLE holiday_houses AUTO_INCREMENT = 1001; 
 
 
 
@@ -91,6 +44,18 @@ INSERT INTO holiday_houses (house_address, number_of_bedrooms, number_of_bathroo
 ('21 Beach Rd, Invercargill', 3, 2, 6, 190.00, 'house20.jpg');
 
 
+/* ----- Create the tables USERS: ----- */
+CREATE TABLE IF NOT EXISTS Users
+(
+  user_id INT PRIMARY KEY AUTO_INCREMENT,
+  username VARCHAR(100) NOT NULL,
+  name VARCHAR(100),
+  email VARCHAR(100) NOT NULL,
+  password VARCHAR(100) NOT NULL,
+  phone_number VARCHAR(20),
+  role_name VARCHAR(50) NOT NULL
+);
+ALTER TABLE users AUTO_INCREMENT = 101;  
 
 /* ----- Insert data into the tables users: ----- */
 /* ----- Insert customer data: ----- */
@@ -99,37 +64,24 @@ INSERT INTO users (username, name,  email, password, phone_number, role_name) VA
 ('Bob123','Bob Johnson', 'bob.johnson@example.com',  'bobPass2', '0211000002', 'customer'),
 ('Carol123','Carol Williams', 'carol.williams@example.com', 'carolPass3', '0211000003', 'customer'),
 ('David123','David Brown', 'david.brown@example.com',  'davidPass4', '0211000004', 'customer'),
-('Emma123','Emma Taylor', 'emma.taylor@example.com',  'emmaPass5', '0211000005', 'customer');
-
-/* ----- Insert staff data: ----- */
-INSERT INTO users  (username, name, email, password, phone_number, role_name) VALUES 
+('Emma123','Emma Taylor', 'emma.taylor@example.com',  'emmaPass5', '0211000005', 'customer'),
 ('Frank22','Frank Wilson', 'frank.wilson@example.com', 'frankPass6', '0211000006', 'staff'),
 ('Grace11','Grace Miller', 'grace.miller@example.com', 'gracePass7', '0211000007', 'staff'),
-('Henry33','Henry Davis', 'henry.davis@example.com', 'henryPass8', '0211000008', 'staff');
-
-/* ----- Insert admin data: ----- */
-INSERT INTO users  (username, name, email, password, phone_number, role_name) VALUES 
+('Henry33','Henry Davis', 'henry.davis@example.com', 'henryPass8', '0211000008', 'staff'),
 ('Isabella555','Isabella Garcia', 'isabella.garcia@example.com', 'isabellaPass9', '0211000009', 'staff-admin');
 
-
-/* ----- Insert data into the tables staffs: ----- */
-INSERT INTO Staff (staff_number, date_joined, user_id) VALUES 
-('STF106', '2023-01-10', 106),
-('STF107', '2023-02-15', 107),
-('STF108', '2023-03-20', 108),
-('STF109', '2023-04-25', 109);
-
-/* ----- Insert data into the tables customer: ----- */
-INSERT INTO customer (customer_number, address, user_id) VALUES 
-('CUS101', '123 Maple Street, Auckland', 101),
-('CUS102', '456 Oak Avenue, Wellington', 102),
-('CUS103', '789 Pine Road, Christchurch', 103),
-('CUS104', '321 Birch Lane, Hamilton', 104),
-('CUS105', '654 Cedar Path, Dunedin', 105);
-
-
-
-
+/* ----- Create the tables secureusers: ----- */
+CREATE TABLE IF NOT EXISTS secureusers
+(
+  user_id INT PRIMARY KEY AUTO_INCREMENT,
+  username VARCHAR(100) NOT NULL,
+  name VARCHAR(100),
+  email VARCHAR(100) NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  phone_number VARCHAR(20),
+  role_name VARCHAR(50) NOT NULL
+);
+ALTER TABLE secureusers AUTO_INCREMENT = 101;  
 
 /* ----- Insert data into the tables secureusers: ----- */
 /* ----- Insert customer data: ----- */
@@ -138,14 +90,67 @@ INSERT INTO secureusers (username, name,  email, password, phone_number, role_na
 ('Bob123','Bob Johnson', 'bob.johnson@example.com',  'bobPass2', '0211000002', 'customer'),
 ('Carol123','Carol Williams', 'carol.williams@example.com', 'carolPass3', '0211000003', 'customer'),
 ('David123','David Brown', 'david.brown@example.com',  'davidPass4', '0211000004', 'customer'),
-('Emma123','Emma Taylor', 'emma.taylor@example.com',  'emmaPass5', '0211000005', 'customer');
-
-/* ----- Insert staff data: ----- */
-INSERT INTO secureusers  (username, name, email, password, phone_number, role_name) VALUES 
+('Emma123','Emma Taylor', 'emma.taylor@example.com',  'emmaPass5', '0211000005', 'customer'),
 ('Frank22','Frank Wilson', 'frank.wilson@example.com', 'frankPass6', '0211000006', 'staff'),
 ('Grace11','Grace Miller', 'grace.miller@example.com', 'gracePass7', '0211000007', 'staff'),
-('Henry33','Henry Davis', 'henry.davis@example.com', 'henryPass8', '0211000008', 'staff');
+('Henry33','Henry Davis', 'henry.davis@example.com', 'henryPass8', '0211000008', 'staff'),
+('Isabella555','Isabella Garcia', 'isabella.garcia@example.com', 'isabellaPass9', '0211000009', 'staff-admin');
 
-/* ----- Insert admin data: ----- */
-INSERT INTO secureusers  (username, name, email, password, phone_number, role_name) VALUES 
-('admin','Isabella Garcia', 'isabella.garcia@example.com', 'admin', '0211000009', 'staff-admin');
+/* ----- Create the tables customers: ----- */
+CREATE TABLE IF NOT EXISTS customer
+(
+  customer_id INT PRIMARY KEY AUTO_INCREMENT,
+  customer_number VARCHAR(50),
+  address VARCHAR(1000),
+  user_id INT,  
+  FOREIGN KEY (user_id) REFERENCES secureusers(user_id)
+);
+ALTER TABLE customer AUTO_INCREMENT = 501;
+
+
+/* ----- Insert data into the tables customer: ----- */
+INSERT INTO customer (customer_number, address, user_id) VALUES 
+('CN101','123 Maple Street, Auckland', 101),
+('CN102', '456 Oak Avenue, Wellington', 102),
+('CN103','789 Pine Road, Christchurch', 103),
+('CN104','321 Birch Lane, Hamilton', 104),
+('CN105','654 Cedar Path, Dunedin', 105);
+
+
+
+
+/* ----- Create the tables Staffs: ----- */
+CREATE TABLE IF NOT EXISTS Staff
+(
+  staff_id INT PRIMARY KEY AUTO_INCREMENT,
+  staff_number VARCHAR(50),
+  date_joined DATE NOT NULL,
+  user_id INT,  
+  FOREIGN KEY (user_id) REFERENCES secureusers(user_id)
+);
+ALTER TABLE Staff AUTO_INCREMENT = 201; 
+
+INSERT INTO Staff (staff_number, date_joined, user_id) VALUES 
+('STF106', '2023-01-10', 106),
+('STF107', '2023-02-15', 107),
+('STF108', '2023-03-20', 108),
+('STF109', '2023-04-25', 109);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

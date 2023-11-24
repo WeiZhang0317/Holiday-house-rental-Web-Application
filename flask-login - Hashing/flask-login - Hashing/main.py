@@ -134,6 +134,7 @@ def register():
         password = request.form['password']
         phone_number = request.form['phone_number']
         email = request.form['email']
+        address = request.form['address']
         # Check if account exists using MySQL
   
         cursor.execute('SELECT * FROM  secureusers  WHERE username = %s', (username,))
@@ -152,8 +153,16 @@ def register():
           
             password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
             print(password)
-            cursor.execute('INSERT INTO secureusers (username, name, email, password, phone_number, role_name) VALUES ( %s, %s, %s, %s, %s, %s)', (username,name,email,password,phone_number,'customer'))
-            msg = 'You have successfully registered!'
+                   
+            cursor.execute ('INSERT INTO secureusers (username, name, email, phone_number, password, role_name) VALUES (%s, %s, %s, %s, %s, %s)', (username, name, email, phone_number, password, 'customer'))
+           
+            cursor.execute('SELECT user_id FROM secureusers WHERE username = %s', (username,))
+            user_id = cursor.fetchone()['user_id'] 
+            cursor.fetchall()   # Clearing the result set 
+            cursor.execute('INSERT INTO customer (address, user_id) VALUES (%s, %s)', (address, user_id))
+
+            msg = 'You have successfully registered!' 
+
     elif request.method == 'POST':
         # Form is empty... (no POST data)
         msg = 'Please fill out the form!'
