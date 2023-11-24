@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS Users
 (
   user_id INT PRIMARY KEY AUTO_INCREMENT,
   username VARCHAR(100) NOT NULL,
-  name VARCHAR(100),
+  name VARCHAR(100) NOT NULL,
   email VARCHAR(100) NOT NULL,
   password VARCHAR(100) NOT NULL,
   phone_number VARCHAR(20),
@@ -68,15 +68,17 @@ INSERT INTO users (username, name,  email, password, phone_number, role_name) VA
 ('Frank22','Frank Wilson', 'frank.wilson@example.com', 'frankPass6', '0211000006', 'staff'),
 ('Grace11','Grace Miller', 'grace.miller@example.com', 'gracePass7', '0211000007', 'staff'),
 ('Henry33','Henry Davis', 'henry.davis@example.com', 'henryPass8', '0211000008', 'staff'),
-('Isabella555','Isabella Garcia', 'isabella.garcia@example.com', 'isabellaPass9', '0211000009', 'staff-admin');
+('admin','Isabella Garcia', 'isabella.garcia@example.com', 'admin', '0211000009', 'staff-admin'),
+('Isabella555','Isabella Garcia', 'isabella.garcia@example.com', 'isabellaPass9', '0211000009', 'staff-admin')
+;
 
 /* ----- Create the tables secureusers: ----- */
 CREATE TABLE IF NOT EXISTS secureusers
 (
   user_id INT PRIMARY KEY AUTO_INCREMENT,
   username VARCHAR(100) NOT NULL,
-  name VARCHAR(100),
-  email VARCHAR(100) NOT NULL,
+  name VARCHAR(100) NOT NULL,
+  email VARCHAR(100)  NOT NULL,
   password VARCHAR(255) NOT NULL,
   phone_number VARCHAR(20),
   role_name VARCHAR(50) NOT NULL
@@ -94,6 +96,7 @@ INSERT INTO secureusers (username, name,  email, password, phone_number, role_na
 ('Frank22','Frank Wilson', 'frank.wilson@example.com', 'frankPass6', '0211000006', 'staff'),
 ('Grace11','Grace Miller', 'grace.miller@example.com', 'gracePass7', '0211000007', 'staff'),
 ('Henry33','Henry Davis', 'henry.davis@example.com', 'henryPass8', '0211000008', 'staff'),
+('admin','Isabella Garcia', 'isabella.garcia@example.com', 'admin', '0211000009', 'staff-admin'),
 ('Isabella555','Isabella Garcia', 'isabella.garcia@example.com', 'isabellaPass9', '0211000009', 'staff-admin');
 
 /* ----- Create the tables customers: ----- */
@@ -134,7 +137,8 @@ INSERT INTO Staff (staff_number, date_joined, user_id) VALUES
 ('STF106', '2023-01-10', 106),
 ('STF107', '2023-02-15', 107),
 ('STF108', '2023-03-20', 108),
-('STF109', '2023-04-25', 109);
+('STF109', '2023-04-25', 109),
+('STF110', '2023-01-25', 110);
 
 
 
