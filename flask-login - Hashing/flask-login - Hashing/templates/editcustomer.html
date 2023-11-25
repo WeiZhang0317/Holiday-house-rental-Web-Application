@@ -22,13 +22,14 @@
                     <h5 class="card-title">{{ customer['name'] }}</h5>
                 </div>
                 <div class="card-body">
-                    <p class="card-text"><strong>Customer Number:</strong> {{ customer['customer_number'] }}</p>
-                    <p class="card-text"><strong>Username:</strong> {{ customer['username'] }}</p>
-                    <p class="card-text"><strong>Email:</strong> {{ customer['email'] }}</p>
-                    <p class="card-text"><strong>Phone Number:</strong> {{ customer['phone_number'] }}</p>  
-                    <p class="card-text"><strong>Address:</strong> {{ customer['address'] }}</p>
-                    <a href="{{ url_for('edit_customer_page', customer_id=customer['user_id']) }}" class="btn btn-outline-primary btn-sm">Edit</a>
-                    <a href="{{ url_for('delete_customer', customer_id=customer['user_id']) }}" class="btn btn-outline-danger btn-sm">Delete</a>
+                    <p class="card-text"><strong>Customer Number:</strong><br> {{ customer['customer_number'] }}</p>
+                    <p class="card-text"><strong>Username:</strong> <br>{{ customer['username'] }}</p>
+                    <p class="card-text"><strong>Email:</strong> <br>{{ customer['email'] }}</p>
+                    <p class="card-text"><strong>Phone Number:</strong><br> {{ customer['phone_number'] }}</p>  
+                    <p class="card-text"><strong>Address:</strong><br>{{ customer['address'] }}</p>
+                    <br>
+                    <a href="{{ url_for('edit_customer_page', customer_id=customer['user_id']) }}" class="btn btn-outline-secondary mr-5 btn-sm" style="width: 70px;">Edit</a>
+                    <a href="{{ url_for('delete_customer', customer_id=customer['user_id']) }}" class="btn btn-outline-danger  btn-sm" style="width: 70px;">Delete</a>
 
                  
 
