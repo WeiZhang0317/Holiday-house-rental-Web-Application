@@ -4,6 +4,13 @@
 <div class="container mt-4">
     <h2 class="mb-4">Manage Staff Profiles</h2>
     
+
+    {% for message in get_flashed_messages(category_filter=["staff"]) %}
+    <div class="alert alert-info">
+        {{ message }}
+    </div>
+    {% endfor %}
+    
     <div class="mb-3 d-flex justify-content-end">
         <a href="{{ url_for('edit_staff_add') }}" class="btn btn-outline-success">Add a Staff</a>
     </div>
@@ -32,11 +39,5 @@
         {% endfor %}
     </div>
 
-
-    {% for message in get_flashed_messages(category_filter=["staffdelete,edit"]) %}
-    <div class="alert alert-info">
-        {{ message }}
-    </div>
-    {% endfor %}
 </div>
 {% endblock %}

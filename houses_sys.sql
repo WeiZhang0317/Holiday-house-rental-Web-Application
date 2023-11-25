@@ -44,34 +44,6 @@ INSERT INTO holiday_houses (house_address, number_of_bedrooms, number_of_bathroo
 ('21 Beach Rd, Invercargill', 3, 2, 6, 190.00, 'house20.jpg');
 
 
-/* ----- Create the tables USERS: ----- */
-CREATE TABLE IF NOT EXISTS Users
-(
-  user_id INT PRIMARY KEY AUTO_INCREMENT,
-  username VARCHAR(100) NOT NULL,
-  name VARCHAR(100) NOT NULL,
-  email VARCHAR(100) NOT NULL,
-  password VARCHAR(100) NOT NULL,
-  phone_number VARCHAR(20),
-  role_name VARCHAR(50) NOT NULL
-);
-ALTER TABLE users AUTO_INCREMENT = 101;  
-
-/* ----- Insert data into the tables users: ----- */
-/* ----- Insert customer data: ----- */
-INSERT INTO users (username, name,  email, password, phone_number, role_name) VALUES 
-('Alice123','Alice Smith', 'alice.smith@example.com', 'alicePass1', '0211000001', 'customer'),
-('Bob123','Bob Johnson', 'bob.johnson@example.com',  'bobPass2', '0211000002', 'customer'),
-('Carol123','Carol Williams', 'carol.williams@example.com', 'carolPass3', '0211000003', 'customer'),
-('David123','David Brown', 'david.brown@example.com',  'davidPass4', '0211000004', 'customer'),
-('Emma123','Emma Taylor', 'emma.taylor@example.com',  'emmaPass5', '0211000005', 'customer'),
-('Frank22','Frank Wilson', 'frank.wilson@example.com', 'frankPass6', '0211000006', 'staff'),
-('Grace11','Grace Miller', 'grace.miller@example.com', 'gracePass7', '0211000007', 'staff'),
-('Henry33','Henry Davis', 'henry.davis@example.com', 'henryPass8', '0211000008', 'staff'),
-('admin','Isabella Garcia', 'isabella.garcia@example.com', 'admin', '0211000009', 'staff-admin'),
-('Isabella555','Isabella Garcia', 'isabella.garcia@example.com', 'isabellaPass9', '0211000009', 'staff-admin')
-;
-
 /* ----- Create the tables secureusers: ----- */
 CREATE TABLE IF NOT EXISTS secureusers
 (

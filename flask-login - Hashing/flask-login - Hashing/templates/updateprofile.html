@@ -4,6 +4,7 @@
 <div class="container mt-4">
     <h2 class="mb-4" >Edit your profile</h2>
 
+
     <form method="POST" action="{{ url_for('update_profile') }}" class="bg-light p-4 border rounded">
         <div class="form-group mb-3">
             <label for="username" class="form-label">Username:</label>
@@ -28,8 +29,8 @@
             <input type="text" id="address" name="address" value="{{ customer['address'] }}" class="form-control">
         </div>
         {% endif %}
-        <button type="submit" class="btn btn-primary">Update Profile</button>
-        <a href="{{ url_for('profile') }}"  class="btn btn-primary" >Back</a>
+        <button type="submit" class="btn btn-outline-secondary">Update Profile</button>
+        <a href="{{ url_for('profile') }}"  class="btn btn-outline-secondary" >Back</a>
     </form>
 </div>
 {% endblock %}

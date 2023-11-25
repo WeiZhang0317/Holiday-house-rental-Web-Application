@@ -24,6 +24,15 @@
            font-family: 'Arial', sans-serif; /* Example font */
            color: #596574; /* Bootstrap primary color, you can customize it */
              } 
+
+             
+             .grey-link {
+             color: grey;
+             } 
+
+             .grey-link:hover {
+            color: darkgrey;
+              }
          
 
         </style>
@@ -75,11 +84,11 @@
                                 </div>
                                 
 
-                                <button type="submit" class="btn btn-primary btn-block mb-4">Register</button>
+                                <button type="submit" class="btn btn-outline-secondary btn-block mb-4">Register</button>
                             </form>
 
                             <div class="d-flex justify-content-around mt-4">
-                                <p>Already has an account? <a href="{{ url_for('login') }}" >Login</a>
+                                <p>Already has an account? <a href="{{ url_for('login') }}"  class="grey-link" >Login</a>
                             </div>
 
                         </div>

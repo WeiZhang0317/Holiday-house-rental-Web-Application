@@ -7,7 +7,7 @@
 
         <div class="form-group">
             <label for="staff_number">Staff Number:</label>
-            <input type="text" class="form-control" id="staff_number" name="staff_number"  required>
+            <input type="text" class="form-control" id="staff_number" name="staff_number" value="{{ staff['staff_number'] }}"  required>
         </div>
 
         <div class="form-group">
@@ -45,7 +45,7 @@
         
 
 
-        <button type="submit" class="btn btn-primary">Edit Staff</button>
+        <button type="submit" class="btn btn-outline-secondary">Edit Staff</button>
     </form>
 </div>
 {% endblock %}

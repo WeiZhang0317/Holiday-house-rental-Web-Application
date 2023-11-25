@@ -13,15 +13,21 @@
             }
             .card {
                 background: rgba(255, 255, 255, 0.8); /*  for better readability */
-                margin-top: 110px; 
+                margin-top: 70px; 
             }
-
-        
 
              .title {
            font-family: 'Arial', sans-serif; 
-           color: #596574; 
+           color: grey; 
              } 
+
+             .grey-link {
+             color: grey;
+             } 
+
+             .grey-link:hover {
+            color: darkgrey;
+              }
          
 
         </style>
@@ -53,13 +59,13 @@
                                 </div>
                                 
                                 <div class="pt-1 mb-4">
-                                    <button type="submit" class="btn btn-primary btn-block mb-4">Login</button>
+                                    <button type="submit" class="btn btn-outline-secondary btn-block mb-4">Login</button>
                                 </div>
                                 <div class="msg">{{ msg }}</div>
                             </form>
                             <!-- nevi-->
                             <div class="d-flex justify-content-around mt-4">
-                                <p>Not a member? <a href="{{ url_for('register') }}" >Register</a>
+                                <p>Not a member? <a href="{{ url_for('register') }}"  class="grey-link" >Register</a>
                             </div>
                         </div>
                     </div>
