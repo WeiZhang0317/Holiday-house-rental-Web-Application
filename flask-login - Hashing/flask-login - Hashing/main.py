@@ -141,13 +141,21 @@ def register():
         account = cursor.fetchone()
         # If account exists show error and validation checks
         if account:
-            msg = 'Account already exists!'
+            msg = 'Account already exists! Please choose another user name'
         elif not re.match(r'[^@]+@[^@]+\.[^@]+', email):
-            msg = 'Invalid email address!'
+            msg = 'Invalid email address! Use format: username@example.com'
         elif not re.match(r'[A-Za-z0-9]+', username):
             msg = 'Username must contain only characters and numbers!'
         elif not username or not password or not email:
             msg = 'Please fill out the form!'
+        elif not name or not re.match(r'^[A-Za-z\s]+$', name):
+           msg = 'Invalid name! Name should only contain letters and spaces.' 
+        elif not address:
+           msg = 'Please enter your address!' 
+
+        elif len(password) < 4:
+           msg = 'Password must have at least 4 characters.'
+        
         else:
             # Account doesnt exists and the form data is valid, now insert new account into accounts table
           
@@ -180,8 +188,14 @@ def home():
         cursor.execute('SELECT * FROM secureusers WHERE username = %s', (username,))
         account = cursor.fetchone()
 
-        # Retrieve holiday houses data from database
-        cursor.execute('SELECT * FROM holiday_houses')
+        search_query = request.args.get('search')  # 获取搜索关键字
+        if search_query is not None:
+    
+           cursor.execute("SELECT * FROM holiday_houses WHERE house_address LIKE %s", ('%' + search_query + '%',))
+        else:
+      
+           cursor.execute('SELECT * FROM holiday_houses')
+
         holiday_houses = cursor.fetchall()
 
         # Render the home template with account, username, and holiday houses data
@@ -203,8 +217,14 @@ def staffhome():
         cursor.execute('SELECT * FROM secureusers WHERE username = %s', (username,))
         account = cursor.fetchone()
 
-        # Retrieve holiday houses data from database
-        cursor.execute('SELECT * FROM holiday_houses')
+        search_query = request.args.get('search')  # 获取搜索关键字
+        if search_query is not None:
+        # 使用 LIKE 语句进行模糊匹配
+           cursor.execute("SELECT * FROM holiday_houses WHERE house_address LIKE %s", ('%' + search_query + '%',))
+        else:
+        # 没有搜索关键字时显示所有房屋
+           cursor.execute('SELECT * FROM holiday_houses')
+
         holiday_houses = cursor.fetchall()
 
         # Render the home template with account, username, and holiday houses data

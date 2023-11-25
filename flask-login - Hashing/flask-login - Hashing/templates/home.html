@@ -9,8 +9,24 @@ function of view different hosues and its details, nevi bar to lead to profile p
 {% block content %}
 
     <div class="container mt-4">
+        <div class="mb-3 d-flex justify-content-between align-items-center">
+            <!-- Search bar -->
+            <form action="{{ url_for('home') }}" method="get" class="flex-grow-1 mr-2">
+                <div class="input-group">
+                    <input type="text" class="form-control" name="search" placeholder="Search by address keywords...">
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-secondary" type="submit">Search</button>
+                    </div>
+                </div>
+            </form>
+    
+            <!-- back to home after search button -->
+            {% if request.args.get('search') %}
+                <a href="{{ url_for('home') }}" class="btn btn-outline-primary mr-2">Return to All Houses</a>
+            {% endif %}
+    
+        </div>
         <div class="row">
-            
             {% for house in holiday_houses %}
                 <div class="col-md-4 mb-4 d-flex align-items-stretch">
                     <div class="card w-100">
