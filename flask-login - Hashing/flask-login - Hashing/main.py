@@ -144,7 +144,7 @@ def register():
             msg = 'Account already exists! Please choose another user name'
         elif not re.match(r'[^@]+@[^@]+\.[^@]+', email):
             msg = 'Invalid email address! Use format: username@example.com'
-        elif not re.match(r'[A-Za-z0-9]+', username):
+        elif not re.match(r'^[A-Za-z0-9]+$', username):
             msg = 'Username must contain only characters and numbers!'
         elif not username or not password or not email:
             msg = 'Please fill out the form!'
@@ -493,7 +493,31 @@ def edit_customer_page(customer_id):
             phone_number = request.form.get('phone_number')
             address = request.form.get('address')
             customer_number = request.form.get('customer_number')
+            
+            error_msg = None
 
+            # Validation 1: Check if the username already exists in the database, excluding the current user
+            cursor.execute('SELECT user_id FROM secureusers WHERE username = %s AND user_id != %s', (username, customer_id))
+            if cursor.fetchone():
+                error_msg = 'Username already exists! Please choose another.'
+
+        
+            # Validation 2: Additional format checks
+            # Check username format (only characters and numbers)
+            if not re.match(r'^[A-Za-z0-9]+$', username):
+                error_msg = 'Username must contain only characters and numbers!'
+
+            # Check name format (only letters and spaces)
+            if not re.match(r'^[A-Za-z\s]+$', name):
+                error_msg = 'Invalid name! Name should only contain letters and spaces.'
+
+            # If there's an error, return to the form with the error message
+            if error_msg:
+                flash(error_msg)
+                return redirect(url_for('edit_customer_page', customer_id=customer_id))
+            
+            
+            # Update the database records if validation passes
             cursor.execute('UPDATE secureusers SET username = %s, name = %s, email = %s, phone_number = %s WHERE user_id = %s',
                            (username, name, email, phone_number, customer_id))
             cursor.execute('UPDATE customer SET customer_number=%s, address = %s WHERE user_id = %s',

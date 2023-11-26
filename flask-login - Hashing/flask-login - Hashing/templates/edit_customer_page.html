@@ -3,40 +3,64 @@
 {% block content %}
 <div class="container mt-4">
     <h2>Edit Customer Profile</h2>
+    <!-- Section for Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }}" style="color: red;" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+    {% endwith %}
+
     <form method="POST" action="{{ url_for('edit_customer_page', customer_id=customer['user_id']) }}" >
         
         <div class="form-group">
             <label for="customer_number">Customer Number:</label>
-            <input type="text" class="form-control" id="customer_number" name="customer_number" value="{{ customer['customer_number'] }}" required>
+            <input type="text" class="form-control" id="customer_number" name="customer_number" value="{{ customer['customer_number'] }}">
         </div>
 
         <div class="form-group">
-            <label for="username">Username:</label>
+            <label for="username">Username*:</label>
             <input type="text" class="form-control" id="username" name="username" value="{{ customer['username'] }}" required>
+            <small id="usernamehelp" class="form-text text-muted">
+                Username must contain only characters and numbers.
+            </small>
         </div>
 
         <div class="form-group">
-            <label for="name">Name:</label>
+            <label for="name">Name*:</label>
             <input type="text" class="form-control" id="name" name="name" value="{{ customer['name'] }}" required>
+            <small id="namehelp" class="form-text text-muted">
+                Name should only contain letters and spaces.
+            </small>
         </div>
 
         <div class="form-group">
-            <label for="email">Email:</label>
+            <label for="email">Email*:</label>
             <input type="email" class="form-control" id="email" name="email" value="{{ customer['email'] }}" required>
+            <small id="emailhelp" class="form-text text-muted">
+                Valid email format: username@example.com
+            </small>
         </div>
 
         <div class="form-group">
             <label for="phone_number">Phone Number:</label>
-            <input type="text" class="form-control" id="phone_number" name="phone_number" value="{{ customer['phone_number'] }}" required>
+            <input type="text" class="form-control" id="phone_number" name="phone_number" value="{{ customer['phone_number'] }}" >
         </div>
 
         <div class="form-group">
-            <label for="address">Address:</label>
+            <label for="address">Address*:</label>
             <input type="text" class="form-control" id="address" name="address" value="{{ customer['address'] }}" required>
+
+            <small id="registerhelp" class="form-text text-muted">
+                <strong>* is the required field</strong>
+            </small>
         </div>
         
 
-
+        <br>  
         <button type="submit" class="btn btn-outline-secondary">Edit Customer</button>
     </form>
 </div>
