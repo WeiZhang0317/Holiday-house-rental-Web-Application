@@ -188,7 +188,7 @@ def home():
         cursor.execute('SELECT * FROM secureusers WHERE username = %s', (username,))
         account = cursor.fetchone()
 
-        search_query = request.args.get('search')  # 获取搜索关键字
+        search_query = request.args.get('search')  # get search keywords
         if search_query is not None:
     
            cursor.execute("SELECT * FROM holiday_houses WHERE house_address LIKE %s", ('%' + search_query + '%',))
@@ -217,12 +217,12 @@ def staffhome():
         cursor.execute('SELECT * FROM secureusers WHERE username = %s', (username,))
         account = cursor.fetchone()
 
-        search_query = request.args.get('search')  # 获取搜索关键字
+        search_query = request.args.get('search')  # get search keywords
         if search_query is not None:
-        # 使用 LIKE 语句进行模糊匹配
+        
            cursor.execute("SELECT * FROM holiday_houses WHERE house_address LIKE %s", ('%' + search_query + '%',))
         else:
-        # 没有搜索关键字时显示所有房屋
+        # show all houses 
            cursor.execute('SELECT * FROM holiday_houses')
 
         holiday_houses = cursor.fetchall()
@@ -382,23 +382,22 @@ def update_profile():
             account = cursor.fetchone()
             cursor.execute('SELECT c.address FROM secureusers AS s JOIN customer AS c ON s.user_id=c.user_id WHERE s.username = %s', (username,))
             customer = cursor.fetchone()
-            return render_template('updateprofile.html', account=account, customer=customer,home_url=home_url)
+            cursor.execute('SELECT s.username,staff.staff_number,staff.date_joined FROM staff JOIN secureusers AS s ON staff.user_id=s.user_id  WHERE s.username = %s', (username,))
+            staff = cursor.fetchone()
+            return render_template('updateprofile.html', account=account, customer=customer,staff=staff, home_url=home_url)
 
         elif request.method == 'POST':
             name = request.form.get('name')
             new_username = request.form.get('username') 
             email = request.form.get('email')
             phone_number = request.form.get('phone_number')
-            new_password = request.form.get('new_password')
+            
             address = request.form.get('address')
-
-            # Only update the password if a new one has been provided
-            if new_password:
-                hashed_password = encrypt_password(new_password)
-                cursor.execute("UPDATE secureusers SET password = %s WHERE username = %s", (hashed_password, username))
-
+            date_joined = request.form.get('date_joined')
+          
+        
             cursor.execute("UPDATE secureusers SET name = %s, email = %s, phone_number = %s WHERE username = %s", (name, email, phone_number, username))
-           
+            cursor.execute("UPDATE staff SET date_joined = %s, WHERE username = %s", (date_joined,username))
             if address:
                 cursor.execute("UPDATE customer SET address = %s WHERE user_id = (SELECT user_id FROM secureusers WHERE username = %s)", (address, username))
 
@@ -448,18 +447,31 @@ def updateprofile_password():
 
 @app.route('/viewcustomer')
 def viewcustomer():
-    
     if 'loggedin' in session and session.get('role_name') == 'staff':
         cursor = getCursor(dictionary_cursor=True)
+        search_query = request.args.get('search')  
+
+        if search_query:
+            
+            query = """
+                SELECT s.*, c.customer_number, c.address
+                FROM secureusers s
+                JOIN customer c ON s.user_id = c.user_id
+                WHERE role_name='customer' AND (s.username LIKE %s OR s.name LIKE %s )
+            """
+            search_term = '%' + search_query + '%'
+            cursor.execute(query, (search_term, search_term))
+        else:
+           
+            cursor.execute("SELECT s.*, c.customer_number, c.address FROM secureusers s JOIN customer c ON s.user_id = c.user_id where role_name='customer'")
         
-        
-        cursor.execute("SELECT s.*, c.customer_number, c.address FROM secureusers s JOIN customer c ON s.user_id = c.user_id where role_name='customer'")
-        customers = cursor.fetchall()  
+        customers = cursor.fetchall()
         home_url = get_home_url_by_role()  
-        return render_template('viewcustomer.html', customers=customers,home_url=home_url)
+        return render_template('viewcustomer.html', customers=customers, home_url=home_url, search_query=search_query)
 
     else:
         return redirect(url_for('login'))
+
 
 @app.route('/editcustomer')
 def editcustomer():
@@ -467,11 +479,24 @@ def editcustomer():
     if 'loggedin' in session and session.get('role_name') == 'staff-admin':
         cursor = getCursor(dictionary_cursor=True)
         
-        
-        cursor.execute("SELECT s.*, c.address, c.customer_number FROM secureusers s JOIN customer c ON s.user_id = c.user_id where role_name='customer'")
+        search_query = request.args.get('search')  # get search keywords
+
+        if search_query:
+            # Search for customers matching the search query
+            query = """
+                SELECT s.*, c.address, c.customer_number
+                FROM secureusers s
+                JOIN customer c ON s.user_id = c.user_id
+                WHERE role_name='customer' AND (s.username LIKE %s OR s.name LIKE %s )
+            """
+            search_term = '%' + search_query + '%'
+            cursor.execute(query, (search_term, search_term))
+        else:
+            # Show all customers
+           cursor.execute("SELECT s.*, c.address, c.customer_number FROM secureusers s JOIN customer c ON s.user_id = c.user_id where role_name='customer'")
         customers = cursor.fetchall()  
         home_url = get_home_url_by_role()  
-        return render_template('editcustomer.html', customers=customers,home_url=home_url)
+        return render_template('editcustomer.html', customers=customers,home_url=home_url, search_query=search_query)
 
     else:
         return redirect(url_for('login'))
@@ -496,13 +521,8 @@ def edit_customer_page(customer_id):
             
             error_msg = None
 
-            # Validation 1: Check if the username already exists in the database, excluding the current user
-            cursor.execute('SELECT user_id FROM secureusers WHERE username = %s AND user_id != %s', (username, customer_id))
-            if cursor.fetchone():
-                error_msg = 'Username already exists! Please choose another.'
-
-        
-            # Validation 2: Additional format checks
+       
+            # Validation: Additional format checks
             # Check username format (only characters and numbers)
             if not re.match(r'^[A-Za-z0-9]+$', username):
                 error_msg = 'Username must contain only characters and numbers!'
@@ -550,8 +570,28 @@ def edit_customer_add():
 
             encrypted_password = encrypt_password('123456') 
         
+            # Validation : Check if the username already exists in the database, excluding the current user
+            cursor.execute('SELECT * FROM secureusers WHERE username = %s', (username,))
+            account = cursor.fetchone()
+            if account:
+                flash('Username already exists! Please choose another.')
+                return redirect(url_for('edit_customer_add'))
 
-        
+
+            # Validation : Additional format checks
+            error_msg = None
+            # Check username format (only characters and numbers)
+            if not re.match(r'^[A-Za-z0-9]+$', username):
+                error_msg = 'Username must contain only characters and numbers!'
+
+            # Check name format (only letters and spaces)
+            if not re.match(r'^[A-Za-z\s]+$', name):
+                error_msg = 'Invalid name! Name should only contain letters and spaces.'
+
+            # If there's an error, return to the form with the error message
+            if error_msg:
+                flash(error_msg)
+                return redirect(url_for('edit_customer_add'))
             cursor.execute ('INSERT INTO secureusers (username, name, email, phone_number, password, role_name) VALUES (%s, %s, %s, %s, %s, %s)', (username, name, email, phone_number, encrypted_password, 'customer'))
            
             cursor.execute('SELECT user_id FROM secureusers WHERE username = %s', (username,))
@@ -609,10 +649,7 @@ def editstaff():
     else:
         return redirect(url_for('login'))
     
-
-
-
-    
+ 
 
 @app.route('/edit_staff_page/<int:staff_id>', methods=['GET', 'POST'])
 def edit_staff_page(staff_id):
@@ -631,6 +668,24 @@ def edit_staff_page(staff_id):
             date_joined = request.form.get('date_joined')
             staff_number = request.form.get('staff_number')
             role_name = request.form.get('role_name')
+
+
+            # Validation : Additional format checks
+            error_msg = None
+            # Check username format (only characters and numbers)
+            if not re.match(r'^[A-Za-z0-9]+$', username):
+                error_msg = 'Username must contain only characters and numbers!'
+
+            # Check name format (only letters and spaces)
+            if not re.match(r'^[A-Za-z\s]+$', name):
+                error_msg = 'Invalid name! Name should only contain letters and spaces.'
+
+            # If there's an error, return to the form with the error message
+            if error_msg:
+                flash(error_msg)
+                return redirect(url_for('edit_customer_add'))
+            
+
             cursor.execute('UPDATE secureusers SET username = %s, name = %s, email = %s, phone_number = %s,  role_name =%s WHERE user_id = %s',
                            (username, name, email, phone_number, role_name, staff_id))
             cursor.execute('UPDATE staff SET date_joined = %s, staff_number=%s WHERE user_id = %s',
@@ -660,6 +715,29 @@ def edit_staff_add():
                 staff_number = request.form.get('staff_number')
                 role_name = request.form.get('role_name')
                 encrypted_password = encrypt_password('56789') 
+                
+                  
+                # Validation : Check if the username already exists in the database, excluding the current user
+                cursor.execute('SELECT * FROM secureusers WHERE username = %s', (username,))
+                account = cursor.fetchone()
+                if account:
+                    flash('Username already exists! Please choose another.')
+                    return redirect(url_for('edit_staff_add'))
+                
+                # Validation : Additional format checks
+                error_msg = None
+                # Check username format (only characters and numbers)
+                if not re.match(r'^[A-Za-z0-9]+$', username):
+                    error_msg = 'Username must contain only characters and numbers!'
+
+                # Check name format (only letters and spaces)
+                if not re.match(r'^[A-Za-z\s]+$', name):
+                    error_msg = 'Invalid name! Name should only contain letters and spaces.'
+
+                # If there's an error, return to the form with the error message
+                if error_msg:
+                    flash(error_msg)
+                    return redirect(url_for('edit_staff_add'))
 
                 # Insert into secureusers
                 cursor.execute('INSERT INTO secureusers (username, name, email, phone_number, password, role_name) VALUES (%s, %s, %s, %s, %s, %s)', (username, name, email, phone_number, encrypted_password, role_name))

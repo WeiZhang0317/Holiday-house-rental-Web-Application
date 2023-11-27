@@ -69,6 +69,7 @@
                                 <div class="form-group">
                                     <label for="password">Password*</label>
                                     <input type="password" class="form-control" name="password" placeholder="Enter your password" id="password" required>
+                                    <input type="checkbox" onclick="showPassword()"> Show Password
                                     <small id="passwordhelp" class="form-text text-muted">
                                         Password must have at least 4 characters.
                                     </small>
@@ -114,5 +115,15 @@
 
         <!-- Include Bootstrap JavaScript -->
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+        <script>
+            function showPassword() {
+                var x = document.getElementById("password");
+                if (x.type === "password") {
+                    x.type = "text";
+                } else {
+                    x.type = "password";
+                }
+            }
+        </script>
     </body>
 </html>

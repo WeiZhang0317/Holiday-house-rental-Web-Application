@@ -26,7 +26,7 @@ function of view different hosues, add/edit/delete houeses, nevi bar to lead to 
         {% endif %}
 
         <!-- add house button -->
-        <a href="{{ url_for('add_house') }}" class="btn btn-outline-info">Add a House</a>
+        <a href="{{ url_for('add_house') }}" class="btn btn-secondary">Add a House</a>
     </div>
         
         {% for message in get_flashed_messages(category_filter=["house"]) %}

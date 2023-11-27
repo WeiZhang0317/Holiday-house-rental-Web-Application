@@ -23,7 +23,7 @@
             <div class="card">
                 <div class="card-body">
                     <h3 class="card-title mb-4">Profile Page</h3>
-                  
+                   <hr>
                     <div class="mb-3">
                         <h6>Username</h6>
                         <p class="text-muted">{{ account['username'] }}</p>
@@ -56,7 +56,7 @@
                     </div>
                     {% endif %}
 
-                    {% if session['role_name'] == 'staff' %}
+                    {% if session['role_name'] == 'staff' or session['role_name'] == 'staff-admin'%}
                     <div class="mb-3">
                         <h6>Join date</h6>
                         <p class="text-muted">{{ staff['date_joined'] }}</p>
@@ -69,7 +69,7 @@
 
                     <br>
            
-                         <a href="{{ url_for('update_profile') }}"  class="btn btn-outline-secondary" >Edit profile</a>
+                         <a href="{{ url_for('update_profile') }}"  class="btn btn-secondary mr-3" >Edit profile</a>
                          <a href="{{ url_for('updateprofile_password') }}"  class="btn btn-outline-secondary" >Generate a new password</a>
                    
 

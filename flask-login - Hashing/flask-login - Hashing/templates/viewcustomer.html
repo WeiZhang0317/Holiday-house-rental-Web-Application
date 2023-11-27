@@ -3,7 +3,25 @@
 {% block content %}
 <div class="container mt-4">
     <h2 class="mb-4">Customer Profiles</h2>
+       <!-- Search bar -->
+       <form action="{{ url_for('viewcustomer') }}" method="get" class="form-inline mr-2">
+        <div class="input-group">
+            <input type="text" class="form-control" name="search" placeholder="Search by customer name/username keywords..." style="width: 600px;">
+            <div class="input-group-append">
+                <button class="btn btn-outline-secondary mr-5" type="submit">Search</button>
+            </div>
+        </div>
+        <div>
+            {% if request.args.get('search') %}
+                <a href="{{ url_for('viewcustomer') }}" class="btn btn-outline-primary ">Return to view all customers</a>
+            {% endif %}
+        </div>
 
+    </form>
+
+ 
+    
+    <br>
     <div class="row">
         {% for customer in customers %}
         <div class="col-md-4 mb-4">
