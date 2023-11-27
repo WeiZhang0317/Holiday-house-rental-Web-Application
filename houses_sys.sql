@@ -10,10 +10,10 @@ CREATE TABLE IF NOT EXISTS holiday_houses
 (
   house_id INT PRIMARY KEY AUTO_INCREMENT,
   house_address VARCHAR(255) NOT NULL,
-  number_of_bedrooms INT,
-  number_of_bathrooms INT,
-  maximum_occupancy INT,
-  rental_per_night DECIMAL(10, 2),
+  number_of_bedrooms INT ,
+  number_of_bathrooms INT ,
+  maximum_occupancy INT ,
+  rental_per_night DECIMAL(10, 2) ,
   house_image VARCHAR(500)
 );
 ALTER TABLE holiday_houses AUTO_INCREMENT = 1001; 
