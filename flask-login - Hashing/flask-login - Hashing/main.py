@@ -144,8 +144,7 @@ def register():
             msg = 'Account already exists! Please choose another user name'
         elif not re.match(r'[^@]+@[^@]+\.[^@]+', email):
             msg = 'Invalid email address! Use format: username@example.com'
-        elif not re.match(r'^[A-Za-z0-9]+$', username):
-            msg = 'Username must contain only characters and numbers!'
+    
         elif not username or not password or not email:
             msg = 'Please fill out the form!'
         elif not name or not re.match(r'^[A-Za-z\s]+$', name):
@@ -382,9 +381,8 @@ def update_profile():
             account = cursor.fetchone()
             cursor.execute('SELECT c.address FROM secureusers AS s JOIN customer AS c ON s.user_id=c.user_id WHERE s.username = %s', (username,))
             customer = cursor.fetchone()
-            cursor.execute('SELECT s.username,staff.staff_number,staff.date_joined FROM staff JOIN secureusers AS s ON staff.user_id=s.user_id  WHERE s.username = %s', (username,))
-            staff = cursor.fetchone()
-            return render_template('updateprofile.html', account=account, customer=customer,staff=staff, home_url=home_url)
+
+            return render_template('updateprofile.html', account=account, customer=customer,home_url=home_url)
 
         elif request.method == 'POST':
             name = request.form.get('name')
@@ -393,11 +391,11 @@ def update_profile():
             phone_number = request.form.get('phone_number')
             
             address = request.form.get('address')
-            date_joined = request.form.get('date_joined')
+
           
         
             cursor.execute("UPDATE secureusers SET name = %s, email = %s, phone_number = %s WHERE username = %s", (name, email, phone_number, username))
-            cursor.execute("UPDATE staff SET date_joined = %s, WHERE username = %s", (date_joined,username))
+          
             if address:
                 cursor.execute("UPDATE customer SET address = %s WHERE user_id = (SELECT user_id FROM secureusers WHERE username = %s)", (address, username))
 
@@ -426,6 +424,11 @@ def updateprofile_password():
             # Check if the new password and confirmation password match
             if new_password != confirm_password:
                 flash("New password and confirmation password do not match.", "error")
+                return redirect(url_for('updateprofile_password'))
+            
+            # Validate the password length
+            if len(new_password) < 4:
+                flash("Password must have at least 4 characters.", "error")
                 return redirect(url_for('updateprofile_password'))
 
             # Hash the new password
@@ -521,12 +524,6 @@ def edit_customer_page(customer_id):
             
             error_msg = None
 
-       
-            # Validation: Additional format checks
-            # Check username format (only characters and numbers)
-            if not re.match(r'^[A-Za-z0-9]+$', username):
-                error_msg = 'Username must contain only characters and numbers!'
-
             # Check name format (only letters and spaces)
             if not re.match(r'^[A-Za-z\s]+$', name):
                 error_msg = 'Invalid name! Name should only contain letters and spaces.'
@@ -580,9 +577,6 @@ def edit_customer_add():
 
             # Validation : Additional format checks
             error_msg = None
-            # Check username format (only characters and numbers)
-            if not re.match(r'^[A-Za-z0-9]+$', username):
-                error_msg = 'Username must contain only characters and numbers!'
 
             # Check name format (only letters and spaces)
             if not re.match(r'^[A-Za-z\s]+$', name):
@@ -672,9 +666,6 @@ def edit_staff_page(staff_id):
 
             # Validation : Additional format checks
             error_msg = None
-            # Check username format (only characters and numbers)
-            if not re.match(r'^[A-Za-z0-9]+$', username):
-                error_msg = 'Username must contain only characters and numbers!'
 
             # Check name format (only letters and spaces)
             if not re.match(r'^[A-Za-z\s]+$', name):
@@ -726,9 +717,6 @@ def edit_staff_add():
                 
                 # Validation : Additional format checks
                 error_msg = None
-                # Check username format (only characters and numbers)
-                if not re.match(r'^[A-Za-z0-9]+$', username):
-                    error_msg = 'Username must contain only characters and numbers!'
 
                 # Check name format (only letters and spaces)
                 if not re.match(r'^[A-Za-z\s]+$', name):
