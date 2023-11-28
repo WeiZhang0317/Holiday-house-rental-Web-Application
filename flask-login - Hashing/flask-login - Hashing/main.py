@@ -118,64 +118,49 @@ def logout():
 
 
 
-
-
-# http://localhost:5000/register - this will be the registration page, we need to use both GET and POST requests
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    # Output message if something goes wrong...
+    form_data = {}
     msg = ''
     cursor = getCursor(dictionary_cursor=True)
-    # Check if "username", "password" and "email" POST requests exist (user submitted form)
-    if request.method == 'POST' and 'username' in request.form and 'password' in request.form and 'email' in request.form:
-        # Create variables for easy access
-        name = request.form['name']
-        username = request.form['username']
-        password = request.form['password']
-        phone_number = request.form['phone_number']
-        email = request.form['email']
-        address = request.form['address']
-        # Check if account exists using MySQL
-  
-        cursor.execute('SELECT * FROM  secureusers  WHERE username = %s', (username,))
+
+    if request.method == 'POST':
+        form_data = request.form.to_dict()
+
+        name = form_data.get('name')
+        username = form_data.get('username')
+        password = form_data.get('password')
+        phone_number = form_data.get('phone_number')
+        email = form_data.get('email')
+        address = form_data.get('address')
+
+        cursor.execute('SELECT * FROM secureusers WHERE username = %s', (username,))
         account = cursor.fetchone()
-        # If account exists show error and validation checks
+
         if account:
             msg = 'Account already exists! Please choose another user name'
         elif not re.match(r'[^@]+@[^@]+\.[^@]+', email):
             msg = 'Invalid email address! Use format: username@example.com'
-        elif not re.match(r'^[A-Za-z0-9]+$', username):
-            msg = 'Username must contain only characters and numbers!'
         elif not username or not password or not email:
             msg = 'Please fill out the form!'
         elif not name or not re.match(r'^[A-Za-z\s]+$', name):
            msg = 'Invalid name! Name should only contain letters and spaces.' 
         elif not address:
            msg = 'Please enter your address!' 
-
         elif len(password) < 4:
            msg = 'Password must have at least 4 characters.'
-        
         else:
-            # Account doesnt exists and the form data is valid, now insert new account into accounts table
-          
-            password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-            print(password)
-                   
-            cursor.execute ('INSERT INTO secureusers (username, name, email, phone_number, password, role_name) VALUES (%s, %s, %s, %s, %s, %s)', (username, name, email, phone_number, password, 'customer'))
-           
+            hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+            cursor.execute('INSERT INTO secureusers (username, name, email, phone_number, password, role_name) VALUES (%s, %s, %s, %s, %s, %s)', (username, name, email, phone_number, hashed_password, 'customer'))
             cursor.execute('SELECT user_id FROM secureusers WHERE username = %s', (username,))
-            user_id = cursor.fetchone()['user_id'] 
-            cursor.fetchall()   # Clearing the result set 
+            user_id = cursor.fetchone()['user_id']
             cursor.execute('INSERT INTO customer (address, user_id) VALUES (%s, %s)', (address, user_id))
-
             msg = 'You have successfully registered!' 
+            return render_template('register.html', form_data=form_data,msg=msg)
 
-    elif request.method == 'POST':
-        # Form is empty... (no POST data)
-        msg = 'Please fill out the form!'
-    # Show registration form with message (if any)
-    return render_template('register.html', msg=msg)
+        return render_template('register.html', form_data=form_data, msg=msg)
+    else:
+        return render_template('register.html',form_data=form_data, msg=msg)
 
 # http://localhost:5000/home - this will be the home page, only accessible for loggedin users
 @app.route('/home')
@@ -299,7 +284,6 @@ def edit_house(house_id):
             else:
                 filename = None
 
-            # Update the house in the database
             update_query = '''
             UPDATE holiday_houses 
             SET house_address = %s, number_of_bedrooms = %s, number_of_bathrooms = %s, 
@@ -310,14 +294,20 @@ def edit_house(house_id):
             if filename:
                 update_query += ', house_image = %s'
                 update_values += (filename,)
+            else:
+                # If no new image is uploaded, don't update the house_image field
+                cursor.execute('SELECT house_image FROM holiday_houses WHERE house_id = %s', (house_id,))
+                current_image = cursor.fetchone()
+                if current_image and current_image['house_image']:
+                    filename = current_image['house_image']
 
             update_query += ' WHERE house_id = %s'
             update_values += (house_id,)
 
             cursor.execute(update_query, update_values)
-
-            flash('House updated successfully!','house')
+            flash('House updated successfully!', 'house')
             return redirect(url_for('staffhome'))
+
 
         else:
             # For a GET request, retrieve the current house data and display it in the form
@@ -382,9 +372,8 @@ def update_profile():
             account = cursor.fetchone()
             cursor.execute('SELECT c.address FROM secureusers AS s JOIN customer AS c ON s.user_id=c.user_id WHERE s.username = %s', (username,))
             customer = cursor.fetchone()
-            cursor.execute('SELECT s.username,staff.staff_number,staff.date_joined FROM staff JOIN secureusers AS s ON staff.user_id=s.user_id  WHERE s.username = %s', (username,))
-            staff = cursor.fetchone()
-            return render_template('updateprofile.html', account=account, customer=customer,staff=staff, home_url=home_url)
+
+            return render_template('updateprofile.html', account=account, customer=customer,home_url=home_url)
 
         elif request.method == 'POST':
             name = request.form.get('name')
@@ -393,11 +382,25 @@ def update_profile():
             phone_number = request.form.get('phone_number')
             
             address = request.form.get('address')
-            date_joined = request.form.get('date_joined')
+
+             # Check name format (only letters and spaces)
+            if not re.match(r'^[A-Za-z\s]+$', name):
+                flash('Invalid name! Name should only contain letters and spaces.')
+                return redirect(url_for('update_profile'))
+            
+            # Validation: Check if the new username already exists in the database, excluding the current user
+            if new_username and new_username != username:
+                cursor.execute('SELECT * FROM secureusers WHERE username = %s AND username != %s', (new_username, username))
+                account = cursor.fetchone()
+                if account:
+                    flash('Username already exists! Please choose another.')
+                    return redirect(url_for('update_profile'))
+
+            # Update user details in the database
+            cursor.execute("UPDATE secureusers SET name = %s, email = %s, phone_number = %s WHERE username = %s", (name, email, phone_number, username))
+          
           
         
-            cursor.execute("UPDATE secureusers SET name = %s, email = %s, phone_number = %s WHERE username = %s", (name, email, phone_number, username))
-            cursor.execute("UPDATE staff SET date_joined = %s, WHERE username = %s", (date_joined,username))
             if address:
                 cursor.execute("UPDATE customer SET address = %s WHERE user_id = (SELECT user_id FROM secureusers WHERE username = %s)", (address, username))
 
@@ -426,6 +429,11 @@ def updateprofile_password():
             # Check if the new password and confirmation password match
             if new_password != confirm_password:
                 flash("New password and confirmation password do not match.", "error")
+                return redirect(url_for('updateprofile_password'))
+            
+            # Validate the password length
+            if len(new_password) < 4:
+                flash("Password must have at least 4 characters.", "error")
                 return redirect(url_for('updateprofile_password'))
 
             # Hash the new password
@@ -521,15 +529,16 @@ def edit_customer_page(customer_id):
             
             error_msg = None
 
-       
-            # Validation: Additional format checks
-            # Check username format (only characters and numbers)
-            if not re.match(r'^[A-Za-z0-9]+$', username):
-                error_msg = 'Username must contain only characters and numbers!'
-
             # Check name format (only letters and spaces)
             if not re.match(r'^[A-Za-z\s]+$', name):
                 error_msg = 'Invalid name! Name should only contain letters and spaces.'
+            
+            
+            # Check if the username already exists in the database for another user
+            cursor.execute('SELECT user_id FROM secureusers WHERE username = %s AND user_id != %s', (username, customer_id))
+            if cursor.fetchone():
+                flash('Username already taken. Please choose another username.')
+                return redirect(url_for('edit_customer_page', customer_id=customer_id))
 
             # If there's an error, return to the form with the error message
             if error_msg:
@@ -551,63 +560,50 @@ def edit_customer_page(customer_id):
 
 @app.route('/edit_customer_add', methods=['GET', 'POST'])
 def edit_customer_add():
-   
-    
-    #only staff or admin are able to add house
-    if 'loggedin' in session and  session.get('role_name') == 'staff-admin':
+    if 'loggedin' in session and session.get('role_name') == 'staff-admin':
         cursor = getCursor(dictionary_cursor=True)
-        if request.method == 'GET':
-            
-            home_url = get_home_url_by_role() 
-            return render_template('edit_customer_add.html', home_url=home_url)
-        elif request.method == 'POST':
-            username = request.form.get('username')
-            name = request.form.get('name')
-            email = request.form.get('email')
-            phone_number = request.form.get('phone_number')
-            address = request.form.get('address')
-            customernumber = request.form.get('customernumber')
+        form_data = {}
 
-            encrypted_password = encrypt_password('123456') 
-        
-            # Validation : Check if the username already exists in the database, excluding the current user
+        if request.method == 'POST':
+            form_data = request.form.to_dict()
+
+            username = form_data.get('username')
+            name = form_data.get('name')
+            email = form_data.get('email')
+            phone_number = form_data.get('phone_number')
+            address = form_data.get('address')
+            customernumber = form_data.get('customernumber')
+            encrypted_password = encrypt_password('123456')
+
+            # Check if the username already exists
             cursor.execute('SELECT * FROM secureusers WHERE username = %s', (username,))
             account = cursor.fetchone()
             if account:
                 flash('Username already exists! Please choose another.')
-                return redirect(url_for('edit_customer_add'))
-
-
-            # Validation : Additional format checks
-            error_msg = None
-            # Check username format (only characters and numbers)
-            if not re.match(r'^[A-Za-z0-9]+$', username):
-                error_msg = 'Username must contain only characters and numbers!'
+                return render_template('edit_customer_add.html', form_data=form_data, home_url=get_home_url_by_role())
 
             # Check name format (only letters and spaces)
             if not re.match(r'^[A-Za-z\s]+$', name):
-                error_msg = 'Invalid name! Name should only contain letters and spaces.'
+                flash('Invalid name! Name should only contain letters and spaces.')
+                return render_template('edit_customer_add.html', form_data=form_data, home_url=get_home_url_by_role())
 
-            # If there's an error, return to the form with the error message
-            if error_msg:
-                flash(error_msg)
-                return redirect(url_for('edit_customer_add'))
-            cursor.execute ('INSERT INTO secureusers (username, name, email, phone_number, password, role_name) VALUES (%s, %s, %s, %s, %s, %s)', (username, name, email, phone_number, encrypted_password, 'customer'))
+            # Insert into secureusers and customer
+            cursor.execute('INSERT INTO secureusers (username, name, email, phone_number, password, role_name) VALUES (%s, %s, %s, %s, %s, %s)', (username, name, email, phone_number, encrypted_password, 'customer'))
            
             cursor.execute('SELECT user_id FROM secureusers WHERE username = %s', (username,))
             user_id = cursor.fetchone()['user_id'] 
-            cursor.fetchall()   # Clearing the result set 
             cursor.execute('INSERT INTO customer (customer_number, address, user_id) VALUES (%s, %s, %s)', (customernumber, address, user_id))
-            flash('New customer added successfully! The default password is 123456, please contact user to update their password. ','delete,edit,add')
+            
+            flash('New customer added successfully! The default password is 123456, please contact user to update their password.', 'delete,edit,add')
 
+            return redirect(url_for('editcustomer'))
 
-
-
-            return redirect(url_for('editcustomer'))           
+        else:
+            home_url = get_home_url_by_role() 
+            return render_template('edit_customer_add.html', home_url=home_url, form_data=form_data)
 
     else:
-        return redirect(url_for('login'))    
-    
+        return redirect(url_for('login'))
 
 
 @app.route('/delete_customer/<int:customer_id>')
@@ -672,13 +668,17 @@ def edit_staff_page(staff_id):
 
             # Validation : Additional format checks
             error_msg = None
-            # Check username format (only characters and numbers)
-            if not re.match(r'^[A-Za-z0-9]+$', username):
-                error_msg = 'Username must contain only characters and numbers!'
 
             # Check name format (only letters and spaces)
             if not re.match(r'^[A-Za-z\s]+$', name):
                 error_msg = 'Invalid name! Name should only contain letters and spaces.'
+
+            # Check if the username already exists in the database for another staff
+            cursor.execute('SELECT user_id FROM secureusers WHERE username = %s AND user_id != %s', (username, staff_id))
+            if cursor.fetchone():
+                flash('Username already taken. Please choose another username.', 'error')
+                return redirect(url_for('edit_staff_page', staff_id=staff_id))
+    
 
             # If there's an error, return to the form with the error message
             if error_msg:
@@ -695,76 +695,63 @@ def edit_staff_page(staff_id):
 
     else:
         return redirect(url_for('login'))    
-    
+  
 @app.route('/edit_staff_add', methods=['GET', 'POST'])
 def edit_staff_add():
     if 'loggedin' in session and session.get('role_name') == 'staff-admin':
         cursor = getCursor(dictionary_cursor=True)
+        form_data = {}
 
-        if request.method == 'GET':
-            home_url = get_home_url_by_role() 
-            return render_template('edit_staff_add.html', home_url=home_url)
+        if request.method == 'POST':
+            form_data = request.form.to_dict()
 
-        elif request.method == 'POST':
             try:
-                username = request.form.get('username')
-                name = request.form.get('name')
-                email = request.form.get('email')
-                phone_number = request.form.get('phone_number')
-                date_joined = request.form.get('date_joined')
-                staff_number = request.form.get('staff_number')
-                role_name = request.form.get('role_name')
-                encrypted_password = encrypt_password('56789') 
-                
-                  
-                # Validation : Check if the username already exists in the database, excluding the current user
+                username = form_data['username']
+                name = form_data['name']
+                email = form_data['email']
+                phone_number = form_data['phone_number']
+                date_joined = form_data['date_joined']
+                staff_number = form_data['staff_number']
+                role_name = form_data['role_name']
+                encrypted_password = encrypt_password('56789')
+
+                # Check if the username already exists
                 cursor.execute('SELECT * FROM secureusers WHERE username = %s', (username,))
                 account = cursor.fetchone()
                 if account:
                     flash('Username already exists! Please choose another.')
-                    return redirect(url_for('edit_staff_add'))
-                
-                # Validation : Additional format checks
-                error_msg = None
-                # Check username format (only characters and numbers)
-                if not re.match(r'^[A-Za-z0-9]+$', username):
-                    error_msg = 'Username must contain only characters and numbers!'
+                    return render_template('edit_staff_add.html', form_data=form_data)
 
                 # Check name format (only letters and spaces)
                 if not re.match(r'^[A-Za-z\s]+$', name):
-                    error_msg = 'Invalid name! Name should only contain letters and spaces.'
-
-                # If there's an error, return to the form with the error message
-                if error_msg:
-                    flash(error_msg)
-                    return redirect(url_for('edit_staff_add'))
+                    flash('Invalid name! Name should only contain letters and spaces.')
+                    return render_template('edit_staff_add.html', form_data=form_data)
 
                 # Insert into secureusers
                 cursor.execute('INSERT INTO secureusers (username, name, email, phone_number, password, role_name) VALUES (%s, %s, %s, %s, %s, %s)', (username, name, email, phone_number, encrypted_password, role_name))
-                
 
                 # Get user_id
                 cursor.execute('SELECT user_id FROM secureusers WHERE username = %s', (username,))
                 user_id = cursor.fetchone()['user_id']
-                cursor.fetchall()  # Clearing the result set
 
                 # Insert into staff
                 cursor.execute('INSERT INTO staff (staff_number, date_joined, user_id) VALUES (%s, %s, %s)', (staff_number, date_joined, user_id))
-              
 
                 flash('New staff added successfully! The default password is 56789, please contact user to update their password.', 'staff')
 
             except Exception as e:
-                # Handle any exceptions that occur
                 print("An error occurred:", e)
                 flash('An error occurred while adding staff.', 'error')
 
             finally:
-                # Close the cursor after operations
                 if cursor:
                     cursor.close()
 
-            return redirect(url_for('editstaff'))           
+            return redirect(url_for('editstaff'))
+
+        else:
+            home_url = get_home_url_by_role() 
+            return render_template('edit_staff_add.html', home_url=home_url, form_data=form_data)
 
     else:
         return redirect(url_for('login'))

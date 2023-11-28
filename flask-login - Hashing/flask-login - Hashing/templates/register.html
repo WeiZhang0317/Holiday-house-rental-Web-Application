@@ -47,12 +47,12 @@
                             <h3 class="title card-title text-center">Register</h3>
                             <form action="{{ url_for('register') }}" method="post" autocomplete="off" class="needs-validation" novalidate>
                                 <div class="form-group">
-                                    <div class="msg" style="color: red;">{{ msg }}</div>
+                                    <div class="msg" style="color: rgb(238, 109, 109);" >{{ msg }}</div>
                                 </div>
                                 
                                 <div class="form-group">
                                     <label for="name">Name*</label>
-                                    <input type="text" class="form-control" name="name" placeholder="Enter your name" id="name" required>
+                                    <input type="text" class="form-control" name="name" id="name" placeholder="Enter your name" value="{{ form_data.name or '' }}" required>
                                     <small id="namehelp" class="form-text text-muted">
                                         Name should only contain letters and spaces.
                                     </small>
@@ -60,10 +60,7 @@
 
                                 <div class="form-group">
                                     <label for="username">Username*</label>
-                                    <input type="text" class="form-control" name="username" placeholder="Enter your username" id="username" required>
-                                    <small id="usernamehelp" class="form-text text-muted">
-                                        Username must contain only characters and numbers.
-                                    </small>
+                                    <input type="text" class="form-control" name="username" id="username" placeholder="Enter your username" value="{{ form_data.username or '' }}" required>
                                 </div>
 
                                 <div class="form-group">
@@ -77,13 +74,13 @@
 
                                 <div class="form-group">
                                     <label for="phone">Phone Number</label>
-                                    <input type="tel" class="form-control" name="phone_number" placeholder="Enter your phone number" id="phone_number">
+                                    <input type="tel" class="form-control" name="phone_number" id="phone_number" placeholder="Enter your phone number" value="{{ form_data.phone_number or '' }}">
                                     
                                 </div>
 
                                 <div class="form-group">
                                     <label for="email">Email*</label>
-                                    <input type="email" class="form-control" name="email" placeholder="Enter your email" id="email" required>
+                                    <input type="email" class="form-control" name="email" id="email" placeholder="Enter your email" value="{{ form_data.email or '' }}" required>
                                     <small id="emailhelp" class="form-text text-muted">
                                         Valid email format: username@example.com
                                     </small>
@@ -91,7 +88,7 @@
 
                                 <div class="form-group">
                                     <label for="address">Address*</label>
-                                    <input type="text" class="form-control" name="address" placeholder="Enter your address" id="address" required>
+                                    <input type="text" class="form-control" name="address" id="address" placeholder="Enter your address" value="{{ form_data.address or '' }}" required>
                                     <small id="registerhelp" class="form-text text-muted">
                                         * is the required field
                                     </small>

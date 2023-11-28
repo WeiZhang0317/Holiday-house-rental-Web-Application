@@ -12,6 +12,7 @@
             </div>
         </div>
         <div>
+            <br>
             {% if request.args.get('search') %}
                 <a href="{{ url_for('viewcustomer') }}" class="btn btn-outline-primary ">Return to view all customers</a>
             {% endif %}

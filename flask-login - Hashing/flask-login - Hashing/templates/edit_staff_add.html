@@ -5,34 +5,30 @@
     <h2>Add Staff Profile</h2>
 
     <!-- Section for Flash Messages -->
-{% with messages = get_flashed_messages(with_categories=true) %}
-{% if messages %}
-    {% for category, message in messages %}
-        <div class="alert alert-{{ category }}" style="color: red;" role="alert">
-            {{ message }}
-        </div>
-    {% endfor %}
-{% endif %}
-{% endwith %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-info">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+    {% endwith %}
 
-
-    <form method="POST" >
+    <form method="POST">
         <div class="form-group">
             <label for="staff_number">Staff Number:</label>
-            <input type="text" class="form-control" id="staff_number" name="staff_number">
+            <input type="text" class="form-control" id="staff_number" name="staff_number" value="{{ form_data.staff_number or '' }}">
         </div>
 
         <div class="form-group">
             <label for="username">Username*:</label>
-            <input type="text" class="form-control" id="username" name="username"  required>
-            <small id="usernamehelp" class="form-text text-muted">
-                Username must contain only characters and numbers.
-            </small>
+            <input type="text" class="form-control" id="username" name="username" value="{{ form_data.username or '' }}" required>
         </div>
 
         <div class="form-group">
             <label for="name">Name*:</label>
-            <input type="text" class="form-control" id="name" name="name"  required>
+            <input type="text" class="form-control" id="name" name="name" value="{{ form_data.name or '' }}" required>
             <small id="namehelp" class="form-text text-muted">
                 Name should only contain letters and spaces.
             </small>
@@ -40,7 +36,7 @@
 
         <div class="form-group">
             <label for="email">Email*:</label>
-            <input type="email" class="form-control" id="email" name="email" required>
+            <input type="email" class="form-control" id="email" name="email" value="{{ form_data.email or '' }}" required>
             <small id="emailhelp" class="form-text text-muted">
                 Valid email format: username@example.com
             </small>
@@ -48,32 +44,29 @@
 
         <div class="form-group">
             <label for="phone_number">Phone Number:</label>
-            <input type="text" class="form-control" id="phone_number" name="phone_number" >
+            <input type="text" class="form-control" id="phone_number" name="phone_number" value="{{ form_data.phone_number or '' }}">
         </div>
 
         <div class="form-group">
             <label for="date_joined">Joined Date*:</label>
-            <input type="date" class="form-control" id="date_joined" name="date_joined" required>
+            <input type="date" class="form-control" id="date_joined" name="date_joined" value="{{ form_data.date_joined or '' }}" required>
         </div>
        
         <div class="form-group">
             <label for="role_name">Role Name*:</label>
             <select class="form-control" id="role_name" name="role_name">
-                <option value="staff">Staff</option>
-                <option value="staff-admin">Staff-Admin</option>
+                <option value="staff" {% if form_data.role_name == 'staff' %}selected{% endif %}>Staff</option>
+                <option value="staff-admin" {% if form_data.role_name == 'staff-admin' %}selected{% endif %}>Staff-Admin</option>
             </select>
             <br>
             <small id="registerhelp" class="form-text text-muted">
-                <strong>* is the required field, the staff default password is 56789</strong>
+                <strong>* is the required field.<br> 
+                    The staff default password is 56789, please contact them to update it in time.</strong>
             </small>
         </div>
 
-
-        <button type="submit" class="btn btn-secondary  mr-3">Add Staff</button>
-        <a href="{{ url_for('editstaff') }}" class="btn btn-outline-secondary ">Return</a>
-
+        <button type="submit" class="btn btn-secondary mr-3">Add Staff</button>
+        <a href="{{ url_for('editstaff') }}" class="btn btn-outline-secondary">Return</a>
     </form>
 </div>
 {% endblock %}
-
-
