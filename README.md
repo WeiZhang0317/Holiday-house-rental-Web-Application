@@ -2,6 +2,9 @@
 # Holiday house rental Web Application
 
 
+
+login details
+
 ## Features
 1. User authentication (login, logout, registration)
 2. Password encryption using bcrypt
