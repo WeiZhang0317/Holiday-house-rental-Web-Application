@@ -15,7 +15,9 @@ app.secret_key = 'zxw secret key'
 connection = None
 
 
-
+# Connect to the MySQL database with credentials and details from the 'connect' module
+# Create and return a cursor object from the database connection
+# If dictionary_cursor is True, the cursor returns query results as dictionaries
 def getCursor(dictionary_cursor=False):
     global connection
     connection = mysql.connector.connect(user=connect.dbuser, password=connect.dbpass, host=connect.dbhost, database=connect.dbname, autocommit=True)
@@ -148,24 +150,40 @@ def register():
         address = form_data.get('address')
 
 
-# validate the information users filled
+     # validate the information users filled
 
         cursor.execute('SELECT * FROM secureusers WHERE username = %s', (username,))
         account = cursor.fetchone()
-
+        
+        #check if the user name is used
         if account:
             msg = 'Account already exists! Please choose another user name'
+        
+         #check email format
         elif not re.match(r'[^@]+@[^@]+\.[^@]+', email):
             msg = 'Invalid email address! Use format: username@example.com'
+        
+        #check if the info has been filled
         elif not username or not password or not email:
             msg = 'Please fill out the form!'
+ 
+        #check if the name is only contains letter and space
         elif not name or not re.match(r'^[A-Za-z\s]+$', name):
            msg = 'Invalid name! Name should only contain letters and spaces.' 
+ 
+        #check if customer has filled the address
         elif not address:
            msg = 'Please enter your address!' 
+
+        #check if passwrod length is at least 4   
         elif len(password) < 4:
            msg = 'Password must have at least 4 characters.'
         else:
+        
+        # if the varify has been passed,
+        #the password will be encrpted and all the data will be update to the database
+        # flash messgae to let customer knows that they have been registered
+        # reder the html template
             hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
             cursor.execute('INSERT INTO secureusers (username, name, email, phone_number, password, role_name) VALUES (%s, %s, %s, %s, %s, %s)', (username, name, email, phone_number, hashed_password, 'customer'))
             cursor.execute('SELECT user_id FROM secureusers WHERE username = %s', (username,))
@@ -175,6 +193,7 @@ def register():
             return render_template('register.html', form_data=form_data,msg=msg)
 
         return render_template('register.html', form_data=form_data, msg=msg)
+# if it is the get request, render template and shows empty form
     else:
         return render_template('register.html',form_data=form_data, msg=msg)
 
@@ -206,7 +225,9 @@ def home():
     return redirect(url_for('login'))
 
 
-# http://localhost:5000/home - this will be the home page, only accessible for loggedin users
+# http://localhost:5000/home - this will be the home page, only accessible for loggedin staff/admin
+#on this page it shows house photo and infomation, including the add, edit and delete button
+# it also include the search bar
 @app.route('/staffhome')
 def staffhome():
     cursor = getCursor(dictionary_cursor=True)
@@ -237,6 +258,8 @@ def staffhome():
 
 
 
+
+# this is the function for staff(include admin) to add house 
 @app.route('/add_house', methods=['GET', 'POST'])
 def add_house():
     cursor = getCursor(dictionary_cursor=True)
@@ -278,6 +301,8 @@ def add_house():
     return redirect(url_for('login'))
 
 
+
+# this is the function for staff(include admin) to edit house 
 @app.route('/edit_house/<int:house_id>', methods=['GET', 'POST'])
 def edit_house(house_id):
     cursor = getCursor(dictionary_cursor=True)
@@ -335,7 +360,7 @@ def edit_house(house_id):
         return redirect(url_for('login'))
 
 
-
+# this is the function for staff(include admin) to delete house on the staffhome page
 @app.route('/delete_house/<int:house_id>')
 def delete_house(house_id):
     cursor = getCursor(dictionary_cursor=True)
@@ -435,13 +460,20 @@ def update_profile():
         return redirect(url_for('login'))
 
 
+# This is for a Flask web application's password update feature.
+
+
+
+
+# Users not logged in are redirected to the login page.
 @app.route('/updateprofile-password', methods=["GET", "POST"])
 def updateprofile_password():
     home_url = get_home_url_by_role() 
     if 'loggedin' in session:
         username = session['username']
         cursor = getCursor(dictionary_cursor=True)
-        
+
+# On a POST request, it checks if the new password matches the confirmation         
         if request.method == 'POST':
             new_password = request.form.get('new_password')
             confirm_password = request.form.get('confirm_password')
@@ -451,11 +483,12 @@ def updateprofile_password():
                 flash("New password and confirmation password do not match.", "error")
                 return redirect(url_for('updateprofile_password'))
             
-            # Validate the password length
+            # Validate the password length,is at least 4 characters long.
             if len(new_password) < 4:
                 flash("Password must have at least 4 characters.", "error")
                 return redirect(url_for('updateprofile_password'))
 
+           #If valid, the password is encrypted and updated in the database, and the user is redirected to their profile.   
             # Hash the new password
             hashed_password = encrypt_password(new_password)
 
@@ -464,17 +497,22 @@ def updateprofile_password():
 
             flash('Password successfully updated.')
             return redirect(url_for('profile'))
-
+      # When accessed via GET, it displays the password update form.
         elif request.method == 'GET':
             # If the request is a GET, simply render the update profile password page
             return render_template('updateprofile-password.html',home_url=home_url)  
     else:
         return redirect(url_for('login'))
 
-        
+ #This code for a web application allows staff members (not include admin) to view customer details. 
+ 
+ # The results are displayed on the viewcustomer.html page. 
 
 @app.route('/viewcustomer')
 def viewcustomer():
+
+#If a staff member is logged in, they can either view all customers 
+# or search for specific ones by username or name.     
     if 'loggedin' in session and session.get('role_name') == 'staff':
         cursor = getCursor(dictionary_cursor=True)
         search_query = request.args.get('search')  
@@ -495,12 +533,13 @@ def viewcustomer():
         
         customers = cursor.fetchall()
         home_url = get_home_url_by_role()  
+          # Render the viewcustomer page with the customers list, home URL, and any search query
         return render_template('viewcustomer.html', customers=customers, home_url=home_url, search_query=search_query)
 
     else:
         return redirect(url_for('login'))
 
-
+# This is the function for the admin to edit customer
 @app.route('/editcustomer')
 def editcustomer():
     
