@@ -31,11 +31,11 @@ Set up the MySQL database and update the connect.py file with your database cred
 
 # Database design
 *mysql database house_sys is used
-![alt text](https://github.com/WeiZhang0317/639-assignment1/blob/main/flask-login%20-%20Hashing/flask-login%20-%20Hashing/static/readme1.jpg)
+![alt text](https://github.com/WeiZhang0317/639-assignment1/blob/main/holiday%20house%20rental%20sys/static/readme1.jpg)
 
 # The relation between endpoint and html template, also its functions
 ## Part1  
-![alt text](https://github.com/WeiZhang0317/639-assignment1/blob/main/flask-login%20-%20Hashing/flask-login%20-%20Hashing/static/readme2.jpg)
+![alt text](https://github.com/WeiZhang0317/639-assignment1/blob/main/holiday%20house%20rental%20sys/static/readme2.jpg)
 
 ## Part2  
-![alt text](https://github.com/WeiZhang0317/639-assignment1/blob/main/flask-login%20-%20Hashing/flask-login%20-%20Hashing/static/readme3.jpg)
+![alt text](https://github.com/WeiZhang0317/639-assignment1/blob/main/holiday%20house%20rental%20sys/static/readme3.jpg)
