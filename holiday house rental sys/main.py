@@ -22,10 +22,12 @@ def getCursor(dictionary_cursor=False):
     cursor = connection.cursor(dictionary=dictionary_cursor)
     return cursor
 
+# encrypt plain password
 def encrypt_password(plain_password):
     salt = bcrypt.gensalt()
     return bcrypt.hashpw(plain_password.encode('utf-8'), salt).decode('utf-8')
 
+# encrypt the password in database securedata
 def encrypt_all_user_passwords():
     cursor = getCursor()
     cursor.execute("SELECT * FROM secureusers")
@@ -34,12 +36,14 @@ def encrypt_all_user_passwords():
     for user in users:
         user_id = user[0]
         plain_password = user[4]
-        
+
+ #make sure the encrypted password does not need to be encrypted again       
         if not plain_password.startswith('$2b$'):
             hashed_pw = encrypt_password(plain_password)
             cursor.execute("UPDATE secureusers SET password = %s WHERE user_id = %s", (hashed_pw, user_id))
 
 
+#Differentiate logged-in user types and navigate to different homepages
 def get_home_url_by_role():
     role_name = session.get('role_name')
     if role_name == 'customer':
@@ -53,7 +57,11 @@ def get_home_url_by_role():
     
 encrypt_all_user_passwords()
 
-# http://localhost:5000/ - main page
+# This section of code defines the main route for the application. 
+# It first checks if the user is already logged in by examining the session. 
+# Depending on the user's role, identified as either 'customer' or 'staff', 
+# the user is redirected to the appropriate home page.
+
 @app.route('/')
 def main():
     # check if user has loggin 
@@ -65,6 +73,7 @@ def main():
     else:
         # if not login it goes to login page
         return redirect(url_for('login'))
+
 
 # http://localhost:5000/login/ - this will be the login page, we need to use both GET and POST requests
 @app.route('/login/', methods=['GET', 'POST'])
@@ -117,6 +126,9 @@ def logout():
    return redirect(url_for('login'))
 
 
+# route for customer register only
+#It checks if a username exists, validates user inputs like email and password, 
+# and inserts new user details into the database if validations pass.
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -124,6 +136,7 @@ def register():
     msg = ''
     cursor = getCursor(dictionary_cursor=True)
 
+#get the information the user filled when they submit the form
     if request.method == 'POST':
         form_data = request.form.to_dict()
 
@@ -133,6 +146,9 @@ def register():
         phone_number = form_data.get('phone_number')
         email = form_data.get('email')
         address = form_data.get('address')
+
+
+# validate the information users filled
 
         cursor.execute('SELECT * FROM secureusers WHERE username = %s', (username,))
         account = cursor.fetchone()
@@ -360,13 +376,17 @@ def profile():
     # User is not loggedin redirect to login page
     return redirect(url_for('login'))
 
-
+#update the profile for all the users
 @app.route('/update_profile', methods=["GET", "POST"])
 def update_profile():
     if 'loggedin' in session:
         username = session['username']
         cursor = getCursor(dictionary_cursor=True)
-        home_url = get_home_url_by_role()  
+        home_url = get_home_url_by_role() 
+
+ #When the user navigates to the profile update page.
+#It queries the secureusers table for basic user information and the customer table for the user's address. 
+#This data is then passed to the updateprofile.html template to pre-fill the form with the user's existing information.  
         if request.method == 'GET':
             cursor.execute('SELECT * FROM secureusers WHERE username = %s', (username,))
             account = cursor.fetchone()
