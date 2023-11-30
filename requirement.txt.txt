@@ -1,4 +1,0 @@
-Flask==3.0
-mysql-connector-python==8.0.28
-bcrypt==3.2.0
-
