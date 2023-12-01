@@ -1,32 +1,36 @@
-{% extends 'layout.html' %}
+{% extends 'layout.html' %} <!-- Extends a base layout template -->
 
 {% block content %}
 <div class="container mt-4">
     <h2>Add Staff Profile</h2>
 
-    <!-- Section for Flash Messages -->
+    <!-- Section for displaying flash messages -->
     {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
         {% for category, message in messages %}
             <div class="alert alert-info">
-                {{ message }}
+                {{ message }} <!-- Display each flash message -->
             </div>
         {% endfor %}
     {% endif %}
     {% endwith %}
 
+    <!-- Form for adding a staff member -->
     <form method="POST">
         <div class="form-group">
+            <!-- Field for Staff Number -->
             <label for="staff_number">Staff Number:</label>
             <input type="text" class="form-control" id="staff_number" name="staff_number" value="{{ form_data.staff_number or '' }}">
         </div>
 
         <div class="form-group">
+            <!-- Field for Username (required) -->
             <label for="username">Username*:</label>
             <input type="text" class="form-control" id="username" name="username" value="{{ form_data.username or '' }}" required>
         </div>
 
         <div class="form-group">
+            <!-- Field for Name (required) -->
             <label for="name">Name*:</label>
             <input type="text" class="form-control" id="name" name="name" value="{{ form_data.name or '' }}" required>
             <small id="namehelp" class="form-text text-muted">
@@ -35,6 +39,7 @@
         </div>
 
         <div class="form-group">
+            <!-- Field for Email (required) -->
             <label for="email">Email*:</label>
             <input type="email" class="form-control" id="email" name="email" value="{{ form_data.email or '' }}" required>
             <small id="emailhelp" class="form-text text-muted">
@@ -43,16 +48,19 @@
         </div>
 
         <div class="form-group">
+            <!-- Field for Phone Number -->
             <label for="phone_number">Phone Number:</label>
             <input type="text" class="form-control" id="phone_number" name="phone_number" value="{{ form_data.phone_number or '' }}">
         </div>
 
         <div class="form-group">
+            <!-- Field for Joined Date (required) -->
             <label for="date_joined">Joined Date*:</label>
             <input type="date" class="form-control" id="date_joined" name="date_joined" value="{{ form_data.date_joined or '' }}" required>
         </div>
        
         <div class="form-group">
+            <!-- Dropdown for selecting Role Name (required) -->
             <label for="role_name">Role Name*:</label>
             <select class="form-control" id="role_name" name="role_name">
                 <option value="staff" {% if form_data.role_name == 'staff' %}selected{% endif %}>Staff</option>
@@ -60,11 +68,12 @@
             </select>
             <br>
             <small id="registerhelp" class="form-text text-muted">
-                <strong>* is the required field.<br> 
-                    The staff default password is 56789, please contact them to update it in time.</strong>
+                <strong>* indicates a required field.<br> 
+                    The staff default password is 56789, please remind them to update it promptly.</strong>
             </small>
         </div>
-
+        <br>
+        <!-- Buttons for submitting the form or returning to the previous page -->
         <button type="submit" class="btn btn-secondary mr-3">Add Staff</button>
         <a href="{{ url_for('editstaff') }}" class="btn btn-outline-secondary">Return</a>
     </form>
