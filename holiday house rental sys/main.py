@@ -539,14 +539,17 @@ def viewcustomer():
     else:
         return redirect(url_for('login'))
 
-# This is the function for the admin to edit customer
+# This is the function for the admin to manage customer
+# it inlude customer information page,
+#search bar and also the add, edit and delete button
 @app.route('/editcustomer')
 def editcustomer():
     
     if 'loggedin' in session and session.get('role_name') == 'staff-admin':
         cursor = getCursor(dictionary_cursor=True)
-        
-        search_query = request.args.get('search')  # get search keywords
+        #the search function to search customer
+        search_query = request.args.get('search')  
+        # get search keywords
 
         if search_query:
             # Search for customers matching the search query
@@ -566,26 +569,33 @@ def editcustomer():
         return render_template('editcustomer.html', customers=customers,home_url=home_url, search_query=search_query)
 
     else:
+        #if not log in back to the login page
         return redirect(url_for('login'))
     
-
+#this is the form to edit the customer 
 @app.route('/edit_customer_page/<int:customer_id>', methods=['GET', 'POST'])
 def edit_customer_page(customer_id):
+
+    #check if the login is admin
     if 'loggedin' in session and session.get('role_name') == 'staff-admin':
         cursor = getCursor(dictionary_cursor=True)
+     
+     #For a GET request, fetch the specified customer's details from the database
         if request.method == 'GET':
             cursor.execute('SELECT s.*, c.address, c.customer_number FROM secureusers s JOIN customer c ON s.user_id = c.user_id WHERE s.role_name = %s AND s.user_id = %s', ('customer', customer_id))
             customer = cursor.fetchone()
             home_url = get_home_url_by_role() 
+      # Render the edit_customer_page template with the fetched customer details and home URL       
             return render_template('edit_customer_page.html', customer=customer,home_url=home_url)
         elif request.method == 'POST':
+        # For a POST request, retrieve form data for customer update     
             username = request.form.get('username')
             name = request.form.get('name')
             email = request.form.get('email')
             phone_number = request.form.get('phone_number')
             address = request.form.get('address')
             customer_number = request.form.get('customer_number')
-            
+        # Initialize an error message variable for future use
             error_msg = None
 
             # Check name format (only letters and spaces)
@@ -614,15 +624,19 @@ def edit_customer_page(customer_id):
             return redirect(url_for('editcustomer'))           
 
     else:
+        #if not log in back to the login page
         return redirect(url_for('login'))    
-    
 
+  
+    
+# the form for admin to add a new customer
 @app.route('/edit_customer_add', methods=['GET', 'POST'])
 def edit_customer_add():
+    # Check if the user is logged in and has the 'staff-admin' role  
     if 'loggedin' in session and session.get('role_name') == 'staff-admin':
         cursor = getCursor(dictionary_cursor=True)
         form_data = {}
-
+   # Retrieve form data and initialize variables
         if request.method == 'POST':
             form_data = request.form.to_dict()
 
@@ -658,17 +672,21 @@ def edit_customer_add():
             return redirect(url_for('editcustomer'))
 
         else:
+            # Render the add customer form for GET request
             home_url = get_home_url_by_role() 
             return render_template('edit_customer_add.html', home_url=home_url, form_data=form_data)
 
     else:
+         # Redirect non-staff-admin users to the login page
         return redirect(url_for('login'))
 
-
+#delete customer from edit customer page
 @app.route('/delete_customer/<int:customer_id>')
 def delete_customer(customer_id):
+     # Initialize a database cursor with dictionary style results
     cursor = getCursor(dictionary_cursor=True)
-
+    
+     # Check if user is logged in and has the 'staff-admin' role
     if 'loggedin' in session and session.get('role_name') == 'staff-admin':
         try:
            #delete from the child tabble customer
@@ -682,39 +700,49 @@ def delete_customer(customer_id):
             flash(f'Error occurred: {err}', 'error')
         finally:
             cursor.close()
-
+       # Redirect to the 'editcustomer' page
         return redirect(url_for('editcustomer'))
 
     else:
+         # Redirect to the login page if user is not logged in or not an admin
         return redirect(url_for('login'))
 
-
+#page for admin to manage staff, including add, edit and delete button
 @app.route('/editstaff')
 def editstaff():
-    
+    # Check if the user is logged in and has the 'staff-admin' role
     if 'loggedin' in session and session.get('role_name') == 'staff-admin':
+         # Initialize a database cursor with dictionary style results
         cursor = getCursor(dictionary_cursor=True)
         
-        
+        # Execute SQL query to select staff details from 'secureusers' and 'staff' tables
         cursor.execute("SELECT s.*, staff.date_joined,staff.staff_number FROM secureusers s JOIN staff ON s.user_id = staff.user_id ")
-        staffs = cursor.fetchall()  
+        staffs = cursor.fetchall()
+        # Get the home URL based on the user role  
         home_url = get_home_url_by_role()  
         return render_template('editstaff.html', staffs=staffs,home_url=home_url)
 
     else:
+        # Redirect to the login page if user is not logged in or not an admin
         return redirect(url_for('login'))
     
  
-
+#page for admin to edit staff information
 @app.route('/edit_staff_page/<int:staff_id>', methods=['GET', 'POST'])
 def edit_staff_page(staff_id):
+
+    # Check if the user is logged in and has the 'staff-admin' role
     if 'loggedin' in session and session.get('role_name') == 'staff-admin':
         cursor = getCursor(dictionary_cursor=True)
+        # Handle GET request: Fetch and display staff details for editing
         if request.method == 'GET':
             cursor.execute("SELECT s.*, staff.staff_number, staff.date_joined FROM secureusers s JOIN staff ON s.user_id = staff.user_id  WHERE  s.user_id = %s", (staff_id,))
+              # Fetch the staff member's data
             staff = cursor.fetchone()
-            home_url = get_home_url_by_role() 
+            home_url = get_home_url_by_role()
             return render_template('edit_staff_page.html', staff=staff,home_url=home_url)
+     # Handle POST request: Update staff details
+     
         elif request.method == 'POST':
             username = request.form.get('username')
             name = request.form.get('name')
@@ -744,7 +772,7 @@ def edit_staff_page(staff_id):
                 flash(error_msg)
                 return redirect(url_for('edit_customer_add'))
             
-
+          #update database and flash info
             cursor.execute('UPDATE secureusers SET username = %s, name = %s, email = %s, phone_number = %s,  role_name =%s WHERE user_id = %s',
                            (username, name, email, phone_number, role_name, staff_id))
             cursor.execute('UPDATE staff SET date_joined = %s, staff_number=%s WHERE user_id = %s',
@@ -754,17 +782,22 @@ def edit_staff_page(staff_id):
 
     else:
         return redirect(url_for('login'))    
-  
+
+ #page for admin to add staff information 
 @app.route('/edit_staff_add', methods=['GET', 'POST'])
 def edit_staff_add():
+
+    # Check if the user is logged in and has the 'staff-admin' role
     if 'loggedin' in session and session.get('role_name') == 'staff-admin':
         cursor = getCursor(dictionary_cursor=True)
         form_data = {}
 
         if request.method == 'POST':
+             # Convert the form data from the request to a dictionary
             form_data = request.form.to_dict()
 
             try:
+                 # Extract individual pieces of data from the form
                 username = form_data['username']
                 name = form_data['name']
                 email = form_data['email']
@@ -772,6 +805,8 @@ def edit_staff_add():
                 date_joined = form_data['date_joined']
                 staff_number = form_data['staff_number']
                 role_name = form_data['role_name']
+
+                # Encrypt a predefined password ('56789' in this case) and store it
                 encrypted_password = encrypt_password('56789')
 
                 # Check if the username already exists
@@ -797,17 +832,17 @@ def edit_staff_add():
                 cursor.execute('INSERT INTO staff (staff_number, date_joined, user_id) VALUES (%s, %s, %s)', (staff_number, date_joined, user_id))
 
                 flash('New staff added successfully! The default password is 56789, please contact user to update their password.', 'staff')
-
+          # Handling exceptions that might occur during form data processing or database operations
             except Exception as e:
                 print("An error occurred:", e)
                 flash('An error occurred while adding staff.', 'error')
-
+         # Finally block to ensure certain actions are executed regardless of exceptions
             finally:
                 if cursor:
                     cursor.close()
 
             return redirect(url_for('editstaff'))
-
+       # If the request method is not POST (it is GET)
         else:
             home_url = get_home_url_by_role() 
             return render_template('edit_staff_add.html', home_url=home_url, form_data=form_data)
@@ -815,29 +850,37 @@ def edit_staff_add():
     else:
         return redirect(url_for('login'))
 
-
+#function for admin to delete staff
 @app.route('/delete_staff/<int:staff_id>')
 def delete_staff(staff_id):
+    # Initialize a database cursor with dictionary style results
     cursor = getCursor(dictionary_cursor=True)
 
+    # Check if the user is logged in and has the 'staff-admin' role
     if 'loggedin' in session and session.get('role_name') == 'staff-admin':
         try:
-           #delete from the child tabble customer
+            # Delete the staff member record from the 'staff' table (child table)
             cursor.execute('DELETE FROM staff WHERE user_id = %s', (staff_id,))
 
-            # delete from the parent table secureusers 
+            # Delete the associated user record from the 'secureusers' table (parent table)
             cursor.execute('DELETE FROM secureusers WHERE user_id = %s', (staff_id,))
 
-            flash('Staff deleted successfully!','staff')
+            # Display a success message to the user
+            flash('Staff deleted successfully!', 'staff')
         except mysql.connector.Error as err:
+            # Display an error message if an exception occurs
             flash(f'Error occurred: {err}', 'error')
         finally:
+            # Close the database cursor to free up resources
             cursor.close()
 
+        # Redirect to the 'editstaff' page after deletion
         return redirect(url_for('editstaff'))
 
     else:
+        # Redirect to the login page if user is not logged in or not an admin
         return redirect(url_for('login'))
+
 
 
 if __name__ == '__main__':
