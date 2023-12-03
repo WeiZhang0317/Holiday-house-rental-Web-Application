@@ -105,7 +105,7 @@ CREATE TABLE IF NOT EXISTS staff
 );
 ALTER TABLE staff AUTO_INCREMENT = 201; 
 
-INSERT INTO Staff (staff_number, date_joined, user_id) VALUES 
+INSERT INTO staff (staff_number, date_joined, user_id) VALUES 
 ('STF106', '2023-01-10', 106),
 ('STF107', '2023-02-15', 107),
 ('STF108', '2023-03-20', 108),
