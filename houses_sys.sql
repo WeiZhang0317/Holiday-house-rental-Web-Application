@@ -95,7 +95,7 @@ INSERT INTO customer (customer_number, address, user_id) VALUES
 
 
 /* ----- Create the tables Staffs: ----- */
-CREATE TABLE IF NOT EXISTS Staff
+CREATE TABLE IF NOT EXISTS staff
 (
   staff_id INT PRIMARY KEY AUTO_INCREMENT,
   staff_number VARCHAR(50),
@@ -103,7 +103,7 @@ CREATE TABLE IF NOT EXISTS Staff
   user_id INT,  
   FOREIGN KEY (user_id) REFERENCES secureusers(user_id)
 );
-ALTER TABLE Staff AUTO_INCREMENT = 201; 
+ALTER TABLE staff AUTO_INCREMENT = 201; 
 
 INSERT INTO Staff (staff_number, date_joined, user_id) VALUES 
 ('STF106', '2023-01-10', 106),
