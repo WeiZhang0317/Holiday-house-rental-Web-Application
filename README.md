@@ -5,7 +5,7 @@
 
 ## Login details
 
- #### Customer Login
+  #### Customer Login
 * USER NAME: Alice123
 * PASSWORD: alicePass1
 
