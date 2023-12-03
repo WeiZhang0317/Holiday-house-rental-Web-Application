@@ -1,13 +1,10 @@
 {% extends 'layout.html' %}
 
-
-
 {% block content %}
 <div class="container mt-5">
     <h2 class="mb-3">Welcome back, {{ account['username'] }}!</h2>
     
-
-    
+    <!-- Display flash messages, if any -->
     {% with messages = get_flashed_messages() %}
     {% if messages %}
       <div class="alert alert-info" role="alert">
@@ -24,6 +21,7 @@
                 <div class="card-body">
                     <h3 class="card-title mb-4">Profile Page</h3>
                    <hr>
+                   <!-- User profile information sections -->
                     <div class="mb-3">
                         <h6>Username</h6>
                         <p class="text-muted">{{ account['username'] }}</p>
@@ -49,6 +47,7 @@
                         <p class="text-muted">{{ account['phone_number'] }}</p>
                     </div>
                     
+                    <!-- Conditional content for different user roles -->
                     {% if session['role_name'] == 'customer' %}
                     <div class="mb-3">
                         <h6>Address</h6>

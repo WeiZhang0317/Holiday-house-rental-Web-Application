@@ -5,7 +5,8 @@
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-
+    
+    <!-- Add backgroud photo -->
     <style>
         body {
             background: url('/static/background.png') no-repeat center center fixed; 
@@ -13,7 +14,7 @@
         }
 
         .card {
-                background: rgba(255, 255, 255, 0.8); /*  for better readability */
+                background: rgba(255, 255, 255, 0.8); 
     
             }
    
@@ -23,7 +24,7 @@
 
 </head>
 <body class="bg-light">
-    <!-- Bootstrap nevi panel with blue background -->
+    <!-- Bootstrap nevi panel with grey background -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-secondary shadow-sm p-3 mb-5">
         <div class="container">
             <a class="navbar-brand"  href="{{ home_url }}">Home</a>
@@ -32,15 +33,19 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ml-auto">
+
+                 <!-- if login as staff the nevi panel is including 'view customer' -->
 				    {% if session['role_name'] == 'staff' %}
                     <li class="nav-item mr-3"><a class="navbar-brand" href="{{ url_for('viewcustomer') }}">ViewCustomer</a></li>
                     {% endif %}
-
+                    <!-- if login as staff-admin the nevi panel is including 'edit custome/edit staff' -->
                     {% if session['role_name'] == 'staff-admin' %}
                     
                     <li class="nav-item mr-3"><a class="navbar-brand" href="{{ url_for('editcustomer') }}">ManageCustomer</a></li>
                     <li class="nav-item mr-3"><a class="navbar-brand" href="{{ url_for('editstaff') }}">ManageStaff</a></li>
                     {% endif %}
+
+                      <!-- all the logged in user can see 'profile' and 'logout' -->
 					<li class="nav-item mr-3"><a class="navbar-brand" href="{{ url_for('profile') }}">MyProfile</a></li>
                     <li class="nav-item mr-3"><a class="navbar-brand" href="{{ url_for('logout') }}">Logout</a></li>
                 </ul>

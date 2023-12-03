@@ -2,7 +2,10 @@
 
 {% block content %}
 <div class="container mt-4">
+    <!-- Title for the form to edit user profile -->
     <h2 class="mb-4" >Edit your profile</h2>
+
+    <!-- Displaying flash messages -->
     {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
     {% for category, message in messages %}
@@ -10,14 +13,18 @@
             {{ message }}
         </div>
     {% endfor %}
-{% endif %}
-{% endwith %}
+    {% endif %}
+    {% endwith %}
 
+    <!-- Form for updating profile -->
     <form method="POST" action="{{ url_for('update_profile') }}" class="bg-light p-4 border rounded">
+        <!-- Input field for username -->
         <div class="form-group mb-3">
             <label for="username" class="form-label">Username*:</label>
             <input type="text" id="username" name="username" value="{{ account['username'] }}" class="form-control" required>
         </div>
+
+        <!-- Input field for name -->
         <div class="form-group mb-3">
             <label for="name" class="form-label">Name*:</label>
             <input type="text" id="name" name="name" value="{{ account['name'] }}" class="form-control" required>
@@ -25,6 +32,8 @@
                 Name should only contain letters and spaces.
             </small>
         </div>
+
+        <!-- Input field for email -->
         <div class="form-group mb-3">
             <label for="email" class="form-label">Email*:</label>
             <input type="email" id="email" name="email" value="{{ account['email'] }}" class="form-control" required>
@@ -33,11 +42,13 @@
             </small>
         </div>
 
+        <!-- Input field for phone number -->
         <div class="form-group mb-3">
             <label for="phone_number" class="form-label">Phone Number:</label>
             <input type="tel" id="phone_number" name="phone_number" value="{{ account['phone_number'] }}" class="form-control">
         </div>
         
+        <!-- Additional fields for customer role -->
         {% if session['role_name'] == 'customer' %}
         <div class="form-group mb-4">
             <label for="address" class="form-label">Address*:</label>
@@ -50,12 +61,15 @@
         <br>
         {% endif %}
 
-        {% if session['role_name'] == 'staff' or session['role_name'] == 'staff-admin'   %}
+        <!-- Note for staff and admin roles -->
+        {% if session['role_name'] == 'staff' or session['role_name'] == 'staff-admin' %}
         <small id="registerhelp" class="form-text text-muted">
             <strong>* is the required field, staff joined date and staff number are only able to be modified by administrator</strong>
         </small>
         <br>
         {% endif %}
+
+        <!-- Buttons for form submission and navigation -->
         <button type="submit" class="btn btn-secondary mr-3">Update Profile</button>
         <a href="{{ url_for('profile') }}"  class="btn btn-outline-secondary" >Back</a>
     </form>

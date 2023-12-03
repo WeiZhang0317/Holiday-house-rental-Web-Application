@@ -2,9 +2,11 @@
 
 {% block content %}
 <div class="container mt-4">
+    <!-- Title for the Customer Profiles section -->
     <h2 class="mb-4">Customer Profiles</h2>
-       <!-- Search bar -->
-       <form action="{{ url_for('viewcustomer') }}" method="get" class="form-inline mr-2">
+
+    <!-- Search bar for finding customers -->
+    <form action="{{ url_for('viewcustomer') }}" method="get" class="form-inline mr-2">
         <div class="input-group">
             <input type="text" class="form-control" name="search" placeholder="Search by customer name/username keywords..." style="width: 600px;">
             <div class="input-group-append">
@@ -13,30 +15,30 @@
         </div>
         <div>
             <br>
+            <!-- Link to return to view all customers -->
             {% if request.args.get('search') %}
                 <a href="{{ url_for('viewcustomer') }}" class="btn btn-outline-primary ">Return to view all customers</a>
             {% endif %}
         </div>
-
     </form>
 
- 
-    
     <br>
+    <!-- Customer profiles displayed in a grid layout -->
     <div class="row">
         {% for customer in customers %}
         <div class="col-md-4 mb-4">
             <div class="card h-100">
                 <div class="card-header">
+                    <!-- Display customer's name -->
                     <h5 class="card-title">{{ customer['name'] }}</h5>
                 </div>
                 <div class="card-body">
+                    <!-- Display various details about the customer -->
                     <p class="card-text"><strong>Customer Number:</strong> {{ customer['customer_number'] }}</p>
                     <p class="card-text"><strong>Username:</strong> {{ customer['username'] }}</p>
                     <p class="card-text"><strong>Email:</strong> {{ customer['email'] }}</p>
                     <p class="card-text"><strong>Phone Number:</strong> {{ customer['phone_number'] }}</p>  
                     <p class="card-text"><strong>Address:</strong> {{ customer['address'] }}</p>
-                
                 </div>
             </div>
         </div>

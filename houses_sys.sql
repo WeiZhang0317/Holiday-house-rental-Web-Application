@@ -68,7 +68,7 @@ INSERT INTO secureusers (username, name,  email, password, phone_number, role_na
 ('Frank22','Frank Wilson', 'frank.wilson@example.com', 'frankPass6', '0211000006', 'staff'),
 ('Grace11','Grace Miller', 'grace.miller@example.com', 'gracePass7', '0211000007', 'staff'),
 ('Henry33','Henry Davis', 'henry.davis@example.com', 'henryPass8', '0211000008', 'staff'),
-('admin','Isabella Garcia', 'isabella.garcia@example.com', 'admin', '0211000009', 'staff-admin'),
+('admin','admin', 'admin@example.com', 'admin', '0211011119', 'staff-admin'),
 ('Isabella555','Isabella Garcia', 'isabella.garcia@example.com', 'isabellaPass9', '0211000009', 'staff-admin');
 
 /* ----- Create the tables customers: ----- */

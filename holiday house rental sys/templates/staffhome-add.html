@@ -2,42 +2,48 @@
 
 {% block content %}
 <div class="container mt-4">
+    <!-- Title for the form to add new holiday house -->
     <h2>Add New Holiday House</h2>
     <form method="POST" enctype="multipart/form-data">
 
+        <!-- Flash messages for form submission -->
         {% for message in get_flashed_messages(category_filter=["add"]) %}
         <div class="alert alert-info">
             {{ message }}
         </div>
         {% endfor %}
 
+        <!-- Input for house address -->
         <div class="form-group">
             <label for="house_address">Address*:</label>
             <input type="text" class="form-control" id="house_address" name="house_address" required>
         </div>
         
+        <!-- Input for number of bedrooms -->
         <div class="form-group">
             <label for="number_of_bedrooms">Number of Bedrooms*:</label>
-            <input type="number" class="form-control" id="number_of_bedrooms" name="number_of_bedrooms"required >
+            <input type="number" class="form-control" id="number_of_bedrooms" name="number_of_bedrooms" required >
         </div>
         
+        <!-- Input for number of bathrooms -->
         <div class="form-group">
             <label for="number_of_bathrooms">Number of Bathrooms*:</label>
             <input type="number" class="form-control" id="number_of_bathrooms" name="number_of_bathrooms" required>
         </div>
         
+        <!-- Input for maximum occupancy -->
         <div class="form-group">
             <label for="maximum_occupancy">Maximum Occupancy*:</label>
             <input type="number" class="form-control" id="maximum_occupancy" name="maximum_occupancy" required>
         </div>
 
+        <!-- Input for rental per night -->
         <div class="form-group">
             <label for="rental_per_night">Rental per night*:</label>
-            <input type="number" class="form-control" id="rental_per_night" name="rental_per_night" min="0" max="10000"  step="0.01" required>
+            <input type="number" class="form-control" id="rental_per_night" name="rental_per_night" min="0" max="10000" step="0.01" required>
         </div>
 
-
-
+        <!-- Input for house image -->
         <div class="form-group">
             <label for="house_image">House Image*:</label>
             <input type="file" class="form-control-file" id="house_image" name="house_image" required>
@@ -46,6 +52,7 @@
                 <strong>* is the required field.</strong>
             </small>
         </div>
+        <!-- Button to submit the form -->
         <button type="submit" class="btn btn-outline-secondary">Add House</button>
     </form>
 </div>

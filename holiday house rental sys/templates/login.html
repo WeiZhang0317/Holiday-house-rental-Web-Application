@@ -44,7 +44,7 @@
                             <h5 class="title" >Holiday House Rental System</h5>
                         </div>
                         <div class="card-body">
-                            <!-- login form-->
+                            <!-- login form, including user name, password and buttons-->
                             <form action="{{ url_for('login') }}" method="post">
                                 <div class="form-group">
                                     <label for="username">Username</label>
@@ -62,6 +62,7 @@
                                 <div class="pt-1 mb-4">
                                     <button type="submit" class="btn btn-outline-secondary btn-block mb-4">Login</button>
                                 </div>
+                                 <!-- flash information -->
                                 <div class="msg" style="color: rgb(238, 109, 109);">{{ msg }}</div>
                             </form>
                             <!-- nevi-->
