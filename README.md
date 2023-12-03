@@ -3,7 +3,23 @@
 
 
 
-login details
+## Login details
+
+#### Customer Login
+* USER NAME: Alice123
+* PASSWORD: alicePass1
+
+  #### Staff Login
+* USER NAME: Frank22
+* PASSWORD: frankPass6
+
+  #### Admin Login
+* USER NAME: admin
+* PASSWORD: admin
+
+  #### Note
+  * If the admin created a staff, the default password is 56789, the password will be edited by users themselves
+  * If the admin created a customer, the default password is 123456, the password will be edited by user themselves
 
 ## Features
 1. User authentication (login, logout, registration)
